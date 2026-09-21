@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Respuesta — Agente de voz con subagentes</title>
+  <style>
+    :root { --bg:#0f172a; --card:#1e293b; --accent:#22d3ee; --text:#e2e8f0; }
+    * { box-sizing: border-box; }
+    body {
+      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      background: radial-gradient(1200px 600px at 50% -10%, #1e3a52, var(--bg));
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text);
+    }
+    main { width:min(560px, 92vw); background:var(--card); border:1px solid #334155; border-radius:16px; padding:28px; box-shadow:0 24px 60px rgba(0,0,0,.45); }
+    h1 { margin:0 0 4px; font-size:1.6rem; letter-spacing:.5px; }
+    h1 span { color: var(--accent); }
+    .sub { margin:0 0 20px; color:#94a3b8; font-size:.9rem; }
+    .controls { display:flex; gap:8px; flex-wrap:wrap; }
+    input {
+      flex:1; min-width:120px; background:#0f172a; color:var(--text); border:1px solid #334155;
+      border-radius:8px; padding:10px 12px; font-size:.95rem;
+    }
+    button {
+      border:0; border-radius:8px; padding:10px 14px; font-size:.95rem; cursor:pointer; font-weight:600;
+    }
+    #connect { background:var(--accent); color:#082f49; }
+    #connect:disabled { opacity:.4; cursor:not-allowed; }
+    #hangup { background:#f87171; color:#450a0a; }
+    #mute { background:#334155; color:var(--text); }
+    button:disabled { opacity:.4; cursor:not-allowed; }
+    #status { margin-top:18px; font-size:.95rem; display:flex; align-items:center; gap:8px; }
+    .dot { width:10px; height:10px; border-radius:50%; background:#475569; display:inline-block; }
+    .dot.live { background:#4ade80; box-shadow:0 0 10px #4ade80; }
+    .dot.busy { background:#facc15; }
+    #log {
+      margin:16px 0 0; padding:0; list-style:none; max-height:220px; overflow:auto;
+      border-top:1px solid #334155; padding-top:12px; font-size:.85rem; color:#94a3b8;
+    }
+    #log li::before { content:"• "; color:var(--accent); }
+    #log li { margin-bottom:6px; word-break:break-word; }
+    #agents {
+      margin-top:10px; background:#0f172a; border:1px solid #334155; border-radius:8px;
+      padding:10px 12px; min-height:60px; max-height:240px; overflow:auto; font-size:.85rem;
+    }
+    .agent-line { margin:6px 0; display:flex; gap:8px; align-items:baseline; }
+    .badge {
+      flex-shrink:0; font-size:.7rem; font-weight:700; padding:2px 7px; border-radius:999px;
+      color:#082f49; letter-spacing:.3px;
+    }
+    .badge.planner  { background:#22d3ee; }
+    .badge.research { background:#a78bfa; color:#2e1065; }
+    .badge.synth    { background:#4ade80; }
+    .agent-line span.msg { word-break:break-word; color:#cbd5e1; }
+    #agents.trabajando { border-color:#facc15; }
+    #agents.done { border-color:#4ade80; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1><span>Respuesta</span></h1>
+    <p class="sub">Agente de voz que coordina subagentes en segundo plano y te avisa por voz.</p>
+
+    <div class="controls">
+      <input id="room" value="demo" placeholder="Sala (ej. demo)" autocomplete="off" />
+      <button id="connect">Llamar</button>
+      <button id="hangup" disabled>Colgar</button>
+      <button id="mute" disabled>Silenciar</button>
+    </div>
+
+    <p id="status"><span class="dot" id="dot"></span><span id="statusText">Desconectado</span></p>
+    <ul id="log"></ul>
+
+    <hr style="border:0;border-top:1px solid #334155;margin:20px 0 14px;" />
+    <h2 style="font-size:.95rem;margin:0 0 8px;"><span style="color:var(--accent)">Modo prueba</span> · subagentes sin voz</h2>
+    <div class="controls">
+      <input id="goal" value="Explica en dos frases qué es Redis" autocomplete="off" />
+      <button id="runTask" style="background:#a78bfa;color:#2e1065;">Iniciar tarea</button>
+    </div>
+    <div id="agents">
+      <p class="sub" style="margin:10px 0 0;">Aquí verás los avisos proactivos del orquestador (plan_ready → subtask_done → analysis_ready) tal y como los diría por voz.</p>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
+  <script>
+    (function () {
+      const roomInput = document.getElementById("room");
+      const connectBtn = document.getElementById("connect");
+      const hangupBtn = document.getElementById("hangup");
+      const muteBtn = document.getElementById("mute");
+      const dot = document.getElementById("dot");
+      const statusText = document.getElementById("statusText");
+      const logEl = document.getElementById("log");
+
+      const Room = window.LivekitClient.Room;
+      const RoomEvent = window.LivekitClient.RoomEvent;
+      const room = new Room();
+
+      function log(msg) {
+        const li = document.createElement("li");
+        li.textContent = msg;
+        logEl.prepend(li);
+      }
+
+      function setStatus(text, live) {
+        statusText.textContent = text;
+        dot.className = "dot" + (live ? " live" : "");
+      }
+
+      room
+        .on(RoomEvent.Connected, () => log("Conectado a la sala " + room.name))
+        .on(RoomEvent.Disconnected, () => {
+          setStatus("Desconectado", false);
+          connectBtn.disabled = false;
+          hangupBtn.disabled = true;
+          muteBtn.disabled = true;
+          log("Llamada finalizada");
+        })
+        .on(RoomEvent.TrackSubscribed, (track) => {
+          if (track.kind === "audio") {
+            const el = track.attach();
+            el.hidden = true;
+            document.body.appendChild(el);
+            log("Audio del agente conectado");
+          }
+        })
+        .on(RoomEvent.ParticipantConnected, (p) => log("Entró: " + p.identity))
+        .on(RoomEvent.ParticipantDisconnected, (p) => log("Salió: " + p.identity));
+
+      connectBtn.addEventListener("click", async () => {
+        try {
+          connectBtn.disabled = true;
+          setStatus("Conectando…", false);
+          const name = roomInput.value.trim() || "demo";
+          const res = await fetch("/token?room=" + encodeURIComponent(name));
+          if (!res.ok) throw new Error("Error obteniendo token: " + (await res.text()));
+          const { token, wsUrl } = await res.json();
+          await room.connect(wsUrl, token);
+          await room.localParticipant.setMicrophoneEnabled(true);
+          setStatus("En llamada · {" + name + "}", true);
+          hangupBtn.disabled = false;
+          muteBtn.disabled = false;
+        } catch (err) {
+          setStatus("Error: " + err.message, false);
+          connectBtn.disabled = false;
+          log("Fallo de conexión: " + err.message);
+        }
+      });
+
+      hangupBtn.addEventListener("click", () => room.disconnect());
+
+      muteBtn.addEventListener("click", async () => {
+        const hp = room.localParticipant;
+        if (!hp) return;
+        const muted = hp.isMicrophoneEnabled;
+        await hp.setMicrophoneEnabled(!muted);
+        muteBtn.textContent = muted ? "Activar" : "Silenciar";
+        log(muted ? "Micrófono activado" : "Micrófono silenciado");
+      });
+
+      // --- Modo prueba: subagentes sin voz -------------------------------
+      const goalInput = document.getElementById("goal");
+      const runBtn = document.getElementById("runTask");
+      const agentsEl = document.getElementById("agents");
+      const BADGE = { planner: "PLANIFICADOR", research: "SUBAGENTE", synthesize: "SUPERVISOR" };
+
+      function agentLine(ev) {
+        const div = document.createElement("div");
+        div.className = "agent-line";
+        const badge = document.createElement("span");
+        badge.className = "badge " + ev.agent;
+        badge.textContent = BADGE[ev.agent] || ev.agent;
+        const msg = document.createElement("span");
+        msg.className = "msg";
+        msg.textContent = ev.priority === "silent" ? "▸ " + ev.message : ev.message;
+        div.append(badge, msg);
+        agentsEl.append(div);
+      }
+
+      runBtn.addEventListener("click", async () => {
+        try {
+          runBtn.disabled = true;
+          agentsEl.innerHTML = '<p class="sub" style="margin:0;">Conectando al bus de eventos…</p>';
+          agentsEl.className = "trabajando";
+          const es = new EventSource("/debug/stream");
+          await new Promise((resolve, reject) => {
+            es.addEventListener("open", () => resolve(), { once: true });
+            es.onerror = () => {
+              if (es.readyState === EventSource.CLOSED) reject(new Error("No se pudo conectar al bus"));
+            };
+          });
+          agentsEl.innerHTML = '<p class="sub" style="margin:0;">Enviando tarea…</p>';
+          es.onmessage = (e) => {
+            const ev = JSON.parse(e.data);
+            if (ev.task_id !== task_id) return;
+            agentsEl.innerHTML = "";
+            agentLine(ev);
+            if (ev.type === "analysis_ready" || ev.priority === "urgent") {
+              agentsEl.className = "done";
+              es.close();
+              runBtn.disabled = false;
+            }
+          };
+          es.onerror = () => {
+            if (es.readyState === EventSource.CLOSED) {
+              es.close();
+              runBtn.disabled = false;
+              agentsEl.className = "";
+              agentLine({ agent: "planner", message: "Se perdió la conexión con el bus de eventos.", priority: "silent" });
+            }
+          };
+          const res = await fetch("/debug/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ goal: goalInput.value.trim() }),
+          });
+          if (!res.ok) throw new Error((await res.json()).detail || "error");
+          const { task_id } = await res.json();
+        } catch (err) {
+          agentsEl.className = "";
+          agentsEl.innerHTML = '<p class="sub" style="margin:0;">Error: ' + err.message + "</p>";
+          runBtn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
