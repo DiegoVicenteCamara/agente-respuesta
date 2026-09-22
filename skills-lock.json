@@ -1,11 +1,23 @@
 {
   "version": 1,
   "skills": {
+    "decision-log": {
+      "source": "moonlight-lupin/agent-skills",
+      "sourceType": "github",
+      "skillPath": "productivity/decision-log/SKILL.md",
+      "computedHash": "9370b31614eae7ef9f0915c3977d22d08d7d8a7d3d369ae99dcb17d373651e86"
+    },
     "spec-driven-development": {
       "source": "addyosmani/agent-skills",
       "sourceType": "github",
       "skillPath": "skills/spec-driven-development/SKILL.md",
       "computedHash": "d4dc15caa8d97749267da68676aeadff3fb5b8d9a4462664937137ac09610e4f"
+    },
+    "summarize-meeting": {
+      "source": "phuryn/pm-skills",
+      "sourceType": "github",
+      "skillPath": "pm-execution/skills/summarize-meeting/SKILL.md",
+      "computedHash": "aff2dd02f137454d4c6bc27a99a2f0b27c16351ae1f6a444d5815068c98e6b2e"
     }
   }
 }

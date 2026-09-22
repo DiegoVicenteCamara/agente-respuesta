@@ -5,7 +5,7 @@ This project uses skills installed under `.opencode/skills/` (or a compatible pa
 ## Core Rules
 
 - If a task matches a skill, invoke it with the `skill` tool before acting.
-- Skills are located in `.opencode/skills/<skill-name>/SKILL.md`.
+- Skills are located in `.opencode/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md`.
 - Follow the skill workflow strictly; do not partially apply it.
 - Never skip required steps such as spec, plan, or test when a skill demands them.
 
@@ -20,6 +20,12 @@ Map the user's intent to the matching skill automatically:
 - Refactoring / simplification → `code-simplification`
 - API or interface design → `api-and-interface-design`
 - UI work → `frontend-ui-engineering`
+- Closing a work period / weekly progress report / retrospective → `project-log`
+
+The mapping is guidance, not exhaustive. If a task matches a skill that is not
+listed here, use it. Always look beyond the mapping: scan `.opencode/skills/`,
+`.agents/skills/`, and global skills locations, and match on each skill's
+`description` before deciding there is no applicable skill.
 
 ## Execution Model
 

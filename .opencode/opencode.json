@@ -1,4 +1,5 @@
 {
+  "$schema": "https://opencode.ai/config.json",
   "plugins": [
     ".opencode/plugins/graphify.js",
     "@dietrichgebert/ponytail"
