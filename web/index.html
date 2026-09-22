@@ -7,15 +7,21 @@
   <style>
     :root { --bg:#0f172a; --card:#1e293b; --accent:#22d3ee; --text:#e2e8f0; }
     * { box-sizing: border-box; }
+    html, body { height:100%; }
     body {
-      margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      margin:0; height:100vh; overflow:hidden; display:flex; align-items:center; justify-content:center;
       background: radial-gradient(1200px 600px at 50% -10%, #1e3a52, var(--bg));
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--text);
     }
-    main { width:min(560px, 92vw); background:var(--card); border:1px solid #334155; border-radius:16px; padding:28px; box-shadow:0 24px 60px rgba(0,0,0,.45); }
+    main {
+      width:min(1120px, 96vw); height:100vh; max-height:100vh; box-sizing:border-box;
+      background:var(--card); border:1px solid #334155; border-radius:0;
+      padding:18px 28px 22px; box-shadow:none;
+      display:flex; flex-direction:column; overflow:hidden;
+    }
     h1 { margin:0 0 4px; font-size:1.6rem; letter-spacing:.5px; }
     h1 span { color: var(--accent); }
-    .sub { margin:0 0 20px; color:#94a3b8; font-size:.9rem; }
+    .sub { margin:0 0 10px; color:#94a3b8; font-size:.9rem; }
     .controls { display:flex; gap:8px; flex-wrap:wrap; }
     input {
       flex:1; min-width:120px; background:#0f172a; color:var(--text); border:1px solid #334155;
@@ -34,8 +40,8 @@
     .dot.live { background:#4ade80; box-shadow:0 0 10px #4ade80; }
     .dot.busy { background:#facc15; }
     #log {
-      margin:16px 0 0; padding:0; list-style:none; max-height:220px; overflow:auto;
-      border-top:1px solid #334155; padding-top:12px; font-size:.85rem; color:#94a3b8;
+      margin:10px 0 0; padding:0; list-style:none; max-height:110px; overflow:auto;
+      border-top:1px solid #334155; padding-top:10px; font-size:.8rem; color:#94a3b8;
     }
     #log li::before { content:"• "; color:var(--accent); }
     #log li { margin-bottom:6px; word-break:break-word; }
@@ -54,6 +60,35 @@
     .agent-line span.msg { word-break:break-word; color:#cbd5e1; }
     #agents.trabajando { border-color:#facc15; }
     #agents.done { border-color:#4ade80; }
+    #gitgraph, #agents { flex:1 1 auto; min-height:0; overflow:auto; }
+    #gitgraph {
+      background:#0f172a; border:1px solid #334155; border-radius:8px; padding:6px 8px;
+    }
+    #agents {
+      background:#0f172a; border:1px solid #334155; border-radius:8px;
+      padding:8px 12px; font-size:.85rem; max-height:none;
+    }
+    #gitgraph::-webkit-scrollbar, #agents::-webkit-scrollbar { width:8px; height:8px; }
+    #gitgraph::-webkit-scrollbar-thumb, #agents::-webkit-scrollbar-thumb { background:#334155; border-radius:4px; }
+    .workspace { display:flex; flex:1 1 auto; min-height:0; margin-top:12px; }
+    .pane { display:flex; flex-direction:column; min-width:180px; min-height:0; }
+    .pane-title {
+      font-size:.78rem; margin:0 0 6px; color:#e2e8f0;
+      display:flex; align-items:center; gap:8px; flex-shrink:0;
+    }
+    .pane-title::before { content:"▍"; color:var(--accent); }
+    .graph-pane { flex:0 0 54%; }
+    .resp-pane { flex:1 1 auto; min-width:240px; }
+    #resizer {
+      width:6px; cursor:col-resize; background:#334155; border-radius:3px;
+      margin:24px 8px 2px; flex-shrink:0; transition:background .15s;
+    }
+    #resizer:hover, #resizer.active { background:#22d3ee; }
+    #gitgraph svg { display:block; width:100%; height:auto; }
+    .graph-main { fill:none; stroke:#22d3ee; stroke-width:2.5; stroke-linecap:round; }
+    .graph-branch { fill:none; stroke:#a78bfa; stroke-width:2; stroke-linecap:round; }
+    .graph-label { font:10px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill:#94a3b8; }
+    .graph-goal { font:600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill:#cbd5e1; }
   </style>
 </head>
 <body>
@@ -77,8 +112,18 @@
       <input id="goal" value="Explica en dos frases qué es Redis" autocomplete="off" />
       <button id="runTask" style="background:#a78bfa;color:#2e1065;">Iniciar tarea</button>
     </div>
-    <div id="agents">
-      <p class="sub" style="margin:10px 0 0;">Aquí verás los avisos proactivos del orquestador (plan_ready → subtask_done → analysis_ready) tal y como los diría por voz.</p>
+    <div class="workspace">
+      <div class="pane graph-pane">
+        <p class="pane-title">Organización de la llamada · un equipo, ramas que fluyen y mergean</p>
+        <div id="gitgraph"></div>
+      </div>
+      <div id="resizer" title="Arrastra para redimensionar"></div>
+      <div class="pane resp-pane">
+        <p class="pane-title">Respuestas de los agentes</p>
+        <div id="agents">
+          <p class="sub" style="margin:10px 0 0;">Aquí verás los avisos proactivos del orquestador (plan_ready → subtask_done → analysis_ready).</p>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -163,7 +208,43 @@
       const goalInput = document.getElementById("goal");
       const runBtn = document.getElementById("runTask");
       const agentsEl = document.getElementById("agents");
+      const graphContainer = document.getElementById("gitgraph");
       const BADGE = { planner: "PLANIFICADOR", research: "SUBAGENTE", synthesize: "SUPERVISOR" };
+
+      const NS = "http://www.w3.org/2000/svg";
+      const MAIN_X = 26, LANE_OFF = 36, LANE_GAP = 30, SP = 30, TOP = 16;
+      const FLOW_RATE = 7, FLOW_CAP = 42, START_PAD = 14;
+      const hist = { svg: null, taskBy: {}, order: [], lanes: 0, mainY: TOP, pts: [TOP], flowBase: TOP, flowTs: Date.now() };
+      let lastGoal = "";
+
+      // --- Paneles redimensionables ---------------------------------------
+      const graphPane = document.querySelector(".graph-pane");
+      const resizer = document.getElementById("resizer");
+      const mainEl = document.querySelector("main");
+
+      let resizing = false;
+      resizer.addEventListener("mousedown", (e) => {
+        resizing = true;
+        e.preventDefault();
+        resizer.classList.add("active");
+        document.body.style.cursor = "col-resize";
+        document.body.style.userSelect = "none";
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (!resizing || !mainEl) return;
+        const r = mainEl.getBoundingClientRect();
+        if (r.width === 0) return;
+        let pct = ((e.clientX - r.left) / r.width) * 100;
+        pct = Math.max(20, Math.min(85, pct));
+        graphPane.style.flexBasis = pct + "%";
+      });
+      window.addEventListener("mouseup", () => {
+        if (!resizing) return;
+        resizing = false;
+        resizer.classList.remove("active");
+        document.body.style.cursor = "";
+        document.body.style.userSelect = "";
+      });
 
       function agentLine(ev) {
         const div = document.createElement("div");
@@ -178,10 +259,178 @@
         agentsEl.append(div);
       }
 
+      function trunc(s, n) {
+        s = String(s == null ? "" : s).replace(/\s+/g, " ").trim();
+        return s.length > n ? s.slice(0, n - 1) + "…" : s;
+      }
+
+      const laneX = (k) => MAIN_X + LANE_OFF + k * LANE_GAP;
+
+      function ensureSvg() {
+        if (hist.svg) return;
+        const svg = document.createElementNS(NS, "svg");
+        hist.svg = svg;
+        graphContainer.append(svg);
+      }
+
+      function ensureTask(taskId, ev) {
+        let t = hist.taskBy[taskId];
+        if (!t) {
+          t = { taskId, goal: ev.goal || lastGoal, planY: null, finalY: null, branches: [], bySubtask: {}, done: false, bannered: false };
+          hist.taskBy[taskId] = t;
+          hist.order.push(t);
+        }
+        return t;
+      }
+
+      function commitMain() {
+        hist.mainY += SP;
+        hist.pts.push(hist.mainY);
+        hist.flowBase = hist.mainY;
+        hist.flowTs = Date.now();
+      }
+
+      function flowY() {
+        const now = Date.now();
+        return Math.min(hist.flowBase + ((now - hist.flowTs) / 1000) * FLOW_RATE, hist.flowBase + FLOW_CAP);
+      }
+
+      function anyRunning() {
+        return hist.order.some((t) => !t.done);
+      }
+
+      function addPath(svg, d, cssClass) {
+        const p = document.createElementNS(NS, "path");
+        p.setAttribute("d", d);
+        p.setAttribute("class", cssClass);
+        svg.appendChild(p);
+      }
+
+      function addDot(svg, x, y, fill, r, opacity) {
+        const c = document.createElementNS(NS, "circle");
+        c.setAttribute("cx", x);
+        c.setAttribute("cy", y);
+        c.setAttribute("r", r);
+        c.setAttribute("fill", fill);
+        if (opacity != null) c.setAttribute("opacity", opacity);
+        svg.appendChild(c);
+      }
+
+      function addText(svg, text, x, y, fill, cssClass) {
+        const t = document.createElementNS(NS, "text");
+        t.setAttribute("x", x);
+        t.setAttribute("y", y);
+        t.setAttribute("fill", fill);
+        t.setAttribute("class", cssClass || "graph-label");
+        t.textContent = text;
+        svg.appendChild(t);
+      }
+
+      function drawGraph() {
+        ensureSvg();
+        const svg = hist.svg;
+        const lanes = hist.lanes;
+        const W = (lanes > 0 ? laneX(lanes - 1) : MAIN_X + LANE_OFF) + 430;
+        const H = Math.max(hist.mainY + 90, 140);
+        svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+        svg.innerHTML = "";
+        const fy = flowY();
+
+        const pts = hist.pts;
+        let d = "M " + MAIN_X + " " + pts[0];
+        for (let i = 1; i < pts.length; i++) d += " L " + MAIN_X + " " + pts[i];
+        addPath(svg, d, "graph-main");
+
+        for (const t of hist.order) {
+          const planY = t.planY;
+          if (planY == null) continue;
+          addText(svg, trunc(t.goal || t.taskId, 34), MAIN_X + 8, planY - 6, "#cbd5e1", "graph-goal");
+          addDot(svg, MAIN_X, planY, "#22d3ee", 4);
+
+          for (const br of t.branches) {
+            const lx = laneX(br.lane);
+            const mergeY = br.mergeY;
+            const tipY = mergeY != null ? mergeY : Math.max(planY + START_PAD, fy);
+            let bd = "M " + MAIN_X + " " + planY + " L " + lx + " " + planY + " L " + lx + " " + tipY;
+            if (mergeY != null) {
+              bd += " C " + lx + " " + (mergeY + 10) + ", " + (lx - 10) + " " + (mergeY + 10) + ", " + (lx - 12) + " " + mergeY + " L " + MAIN_X + " " + mergeY;
+              addDot(svg, MAIN_X, mergeY, "#e2e8f0", 3);
+            }
+            addPath(svg, bd, "graph-branch");
+            addText(svg, trunc(br.subtask, 28), lx + 6, tipY - 4, mergeY != null ? "#a5b4fc" : "#94a3b8");
+          }
+
+          if (t.finalY != null) {
+            addDot(svg, MAIN_X, t.finalY, "#4ade80", 5);
+            addDot(svg, MAIN_X, t.finalY, "#4ade80", 9, 0.25);
+          }
+        }
+      }
+
+      function updateAgentsClass() {
+        agentsEl.className = hist.order.length > 0 && hist.order.every((t) => t.done) ? "done" : "trabajando";
+      }
+
+      function handleEvent(ev) {
+        ev.ts = ev.ts || Date.now();
+        const t = ensureTask(ev.task_id, ev);
+
+        if (ev.type === "plan_ready") {
+          if (t.planY == null) {
+            commitMain();
+            t.planY = hist.mainY;
+          }
+          if (!t.bannered) {
+            t.bannered = true;
+            const div = document.createElement("div");
+            div.className = "agent-line";
+            const badge = document.createElement("span");
+            badge.className = "badge planner";
+            badge.textContent = "TAREA";
+            const msg = document.createElement("span");
+            msg.className = "msg";
+            msg.textContent = "En marcha: " + (t.goal || ev.task_id);
+            div.append(badge, msg);
+            agentsEl.append(div);
+          }
+        }
+        if (ev.type === "subtask_started" && !t.bySubtask[ev.subtask]) {
+          const br = { subtask: ev.subtask, lane: hist.lanes++, mergeY: null };
+          t.bySubtask[ev.subtask] = br;
+          t.branches.push(br);
+        }
+        if (ev.type === "subtask_done") {
+          const br = t.bySubtask[ev.subtask];
+          if (br && br.mergeY == null) {
+            commitMain();
+            br.mergeY = hist.mainY;
+          }
+        }
+        if (ev.type === "analysis_ready") {
+          if (t.finalY == null) {
+            commitMain();
+            t.finalY = hist.mainY;
+          }
+          t.done = true;
+        }
+        if (ev.priority === "urgent") {
+          if (t.finalY == null) {
+            commitMain();
+            t.finalY = hist.mainY;
+          }
+          t.done = true;
+        }
+
+        agentLine(ev);
+        drawGraph();
+        updateAgentsClass();
+      }
+
       runBtn.addEventListener("click", async () => {
+        const goal = goalInput.value.trim();
+        if (!goal) return;
         try {
           runBtn.disabled = true;
-          agentsEl.innerHTML = '<p class="sub" style="margin:0;">Conectando al bus de eventos…</p>';
           agentsEl.className = "trabajando";
           const es = new EventSource("/debug/stream");
           await new Promise((resolve, reject) => {
@@ -190,14 +439,19 @@
               if (es.readyState === EventSource.CLOSED) reject(new Error("No se pudo conectar al bus"));
             };
           });
-          agentsEl.innerHTML = '<p class="sub" style="margin:0;">Enviando tarea…</p>';
+          const res = await fetch("/debug/run", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ goal }),
+          });
+          if (!res.ok) throw new Error((await res.json()).detail || "error");
+          const { task_id } = await res.json();
+          lastGoal = goal;
           es.onmessage = (e) => {
             const ev = JSON.parse(e.data);
             if (ev.task_id !== task_id) return;
-            agentsEl.innerHTML = "";
-            agentLine(ev);
+            handleEvent(ev);
             if (ev.type === "analysis_ready" || ev.priority === "urgent") {
-              agentsEl.className = "done";
               es.close();
               runBtn.disabled = false;
             }
@@ -206,23 +460,23 @@
             if (es.readyState === EventSource.CLOSED) {
               es.close();
               runBtn.disabled = false;
-              agentsEl.className = "";
               agentLine({ agent: "planner", message: "Se perdió la conexión con el bus de eventos.", priority: "silent" });
             }
           };
-          const res = await fetch("/debug/run", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ goal: goalInput.value.trim() }),
-          });
-          if (!res.ok) throw new Error((await res.json()).detail || "error");
-          const { task_id } = await res.json();
         } catch (err) {
           agentsEl.className = "";
-          agentsEl.innerHTML = '<p class="sub" style="margin:0;">Error: ' + err.message + "</p>";
+          agentLine({ agent: "planner", message: "Error: " + err.message, priority: "silent" });
           runBtn.disabled = false;
         }
       });
+
+      setInterval(() => {
+        if (hist.pts.length > 1 && (anyRunning() || Date.now() - hist.flowTs < 3000)) {
+          drawGraph();
+          graphContainer.scrollTop = graphContainer.scrollHeight;
+          graphContainer.scrollLeft = graphContainer.scrollWidth;
+        }
+      }, 120);
     })();
   </script>
 </body>
