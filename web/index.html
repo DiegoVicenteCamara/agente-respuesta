@@ -212,8 +212,8 @@
       const BADGE = { planner: "PLANIFICADOR", research: "SUBAGENTE", synthesize: "SUPERVISOR" };
 
       const NS = "http://www.w3.org/2000/svg";
-      const MAIN_X = 26, LANE_OFF = 36, LANE_GAP = 30, SP = 34, TOP = 16;
-      const FLOW_RATE = 7, FLOW_CAP = 42, START_PAD = 14, MAX_COLS = 4;
+      const MAIN_X = 26, LANE_OFF = 14, LANE_GAP = 30, SP = 34, TOP = 16;
+      const FLOW_RATE = 7, FLOW_CAP = 42, START_PAD = 30, MAX_COLS = 4;
       const hist = { svg: null, taskBy: {}, order: [], cols: [], mainY: TOP, pts: [TOP], flowBase: TOP, flowTs: Date.now() };
       let lastGoal = "";
 
@@ -360,14 +360,14 @@
           addDot(svg, MAIN_X, planY, "#22d3ee", 4);
 
           if (t.lx != null) {
-            const NEK = Math.min(t.lx - MAIN_X, 13);
+            const D = Math.min(t.lx - MAIN_X, 15);
             let sy = planY;
             for (const br of t.branches) {
               const mergeY = br.mergeY;
               const tipY = mergeY != null ? mergeY : Math.max(sy + START_PAD, fy);
-              let bd = "M " + MAIN_X + " " + sy + " Q " + MAIN_X + " " + (sy + NEK) + " " + t.lx + " " + (sy + NEK) + " L " + t.lx + " " + (tipY - NEK);
+              let bd = "M " + MAIN_X + " " + sy + " L " + t.lx + " " + (sy + D) + " L " + t.lx + " " + (tipY - D);
               if (mergeY != null) {
-                bd += " Q " + MAIN_X + " " + (mergeY - NEK) + " " + MAIN_X + " " + mergeY;
+                bd += " L " + MAIN_X + " " + mergeY;
                 addDot(svg, MAIN_X, mergeY, "#e2e8f0", 3);
                 sy = mergeY;
               }

@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   "web/index.html": {
-    "mtime": 1790114539.265447,
-    "seen": 1790114550.674421,
-    "ast_hash": "fabcd31dfc606fc3bc8f60f0b284567f",
+    "mtime": 1790114839.6684272,
+    "seen": 1790114865.645938,
+    "ast_hash": "52b4e842a182dd06bb4779ff1aafa1b8",
     "semantic_hash": ""
   },
   "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md": {
