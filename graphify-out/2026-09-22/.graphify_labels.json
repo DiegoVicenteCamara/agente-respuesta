@@ -12,7 +12,7 @@
   "10": "ADR Format Guide",
   "11": "Review Cadence Rules",
   "12": "ADR-NNN: Decision Title",
-  "13": "load_decisions",
+  "13": "stub_nodes",
   "14": "compute_next_review",
   "15": "Agent Skills (OpenCode)",
   "16": "Summarize Meeting",
@@ -28,10 +28,5 @@
   "26": "run_celery.ps1",
   "27": "run_web.ps1",
   "28": "start_dev.ps1",
-  "29": "status.ps1",
-  "30": "build_parser",
-  "31": "Path",
-  "32": "ADR-001: Grafo de organización tipo ramas GitHub con columnas reutilizables por tarea",
-  "33": "create_decision",
-  "34": "Bitácora — Semana del 2026-09-21 al 2026-09-27"
+  "29": "status.ps1"
 }

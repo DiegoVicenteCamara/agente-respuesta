@@ -216,9 +216,9 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1790114229.448068,
-    "seen": 1790114251.0860248,
-    "ast_hash": "eea2890bf0c0f3d1182f6fffdafbe0ee",
+    "mtime": 1790109331.5250905,
+    "seen": 1790111579.6445951,
+    "ast_hash": "e6e206426d39a23290d1121b71eef7c1",
     "semantic_hash": ""
   },
   "README.md": {
@@ -234,21 +234,9 @@
     "semantic_hash": ""
   },
   "web/index.html": {
-    "mtime": 1790114539.265447,
-    "seen": 1790114550.674421,
-    "ast_hash": "fabcd31dfc606fc3bc8f60f0b284567f",
-    "semantic_hash": ""
-  },
-  "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md": {
-    "mtime": 1790114213.9542248,
-    "seen": 1790114251.0860248,
-    "ast_hash": "28579166ba91c896a8791119ac8c95e3",
-    "semantic_hash": ""
-  },
-  "docs/project-log/2026-09-27.md": {
-    "mtime": 1790114240.4748883,
-    "seen": 1790114251.0860248,
-    "ast_hash": "4e756c6c845ad77bf8b6e24404d087ba",
+    "mtime": 1790113145.6861062,
+    "seen": 1790113268.9943767,
+    "ast_hash": "c4e90133c229553b54426e965362fa32",
     "semantic_hash": ""
   }
 }

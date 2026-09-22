@@ -1,17 +1,17 @@
 # Graph Report - AgenteRespuesta  (2026-09-22)
 
 ## Corpus Check
-- 40 files · ~17,565 words
+- 38 files · ~16,216 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 3 file(s) not represented in the graph (top: .example 1, (none) 1, .ini 1)
 
 ## Summary
-- 439 nodes · 620 edges · 35 communities (23 shown, 12 thin omitted)
+- 416 nodes · 599 edges · 30 communities (18 shown, 12 thin omitted)
 - Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4e3ad3a1`
+- Built from commit: `d728c176`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -29,17 +29,12 @@
 - ADR Format Guide
 - Review Cadence Rules
 - ADR-NNN: Decision Title
-- load_decisions
+- stub_nodes
 - compute_next_review
 - Agent Skills (OpenCode)
 - Summarize Meeting
 - graphify.js
 - opencode.json
-- build_parser
-- Path
-- ADR-001: Grafo de organización tipo ramas GitHub con columnas reutilizables por tarea
-- create_decision
-- Bitácora — Semana del 2026-09-21 al 2026-09-27
 
 ## God Nodes (most connected - your core abstractions)
 1. `Decision Log` - 16 edges
@@ -68,19 +63,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (35 total, 12 thin omitted)
+## Communities (30 total, 12 thin omitted)
 
 ### Community 0 - "decision_log.py"
-Cohesion: 0.15
-Nodes (19): main(), normalized_status(), parse_date(), parse_decision(), parse_next_review(), parse_status(), parse_supersedes_to(), parse_title() (+11 more)
+Cohesion: 0.05
+Nodes (76): add_supersede_link(), adr_glob(), build_parser(), build_timeline_chains(), command_due_review(), command_list(), command_new(), command_search() (+68 more)
 
 ### Community 1 - "graph.py"
 Cohesion: 0.06
-Nodes (44): asyncio, publish_event(), Any, backend_orchestrator, build_graph(), _fan_out(), planner(), _publish() (+36 more)
+Nodes (46): asyncio, get_sync(), publish_event(), Any, backend_orchestrator, build_graph(), _fan_out(), planner() (+38 more)
 
 ### Community 2 - "main.py"
-Cohesion: 0.06
-Nodes (34): backend_api, debug_run(), debug_stream(), get_token(), index(), API web: sirve la página del navegador y emite tokens JWT de LiveKit., Lanza una tarea de prueba a los subagentes (Celery) sin pasar por la voz., SSE: reenvía los eventos del bus de agentes al navegador. (+26 more)
+Cohesion: 0.07
+Nodes (29): backend_api, debug_run(), debug_stream(), get_token(), index(), API web: sirve la página del navegador y emite tokens JWT de LiveKit., Lanza una tarea de prueba a los subagentes (Celery) sin pasar por la voz., SSE: reenvía los eventos del bus de agentes al navegador. (+21 more)
 
 ### Community 3 - "agent.py"
 Cohesion: 0.08
@@ -88,7 +83,7 @@ Nodes (31): Agent, AgentSession, AsyncRedis, backend_bus, get_async(), test_defa
 
 ### Community 4 - "test_decision_log.py"
 Cohesion: 0.09
-Nodes (30): make_log(), Path, A decision with a past review date appears in due-review output., Timeline output follows a superseding chain from oldest to newest., Review cadence computation handles monthly, quarterly, and annually., Status filtering returns only decisions with the requested status family., Temporary decisions directory fixture helper., Tests for the decision-log skill CLI and helpers. (+22 more)
+Nodes (29): make_log(), Path, A decision with a past review date appears in due-review output., Timeline output follows a superseding chain from oldest to newest., Review cadence computation handles monthly, quarterly, and annually., Status filtering returns only decisions with the requested status family., Temporary decisions directory fixture helper., Tests for the decision-log skill CLI and helpers. (+21 more)
 
 ### Community 5 - "review_checker.py"
 Cohesion: 0.10
@@ -122,17 +117,17 @@ Nodes (10): annually, Cadence options, Calendar-month calculation, Choosing the 
 Cohesion: 0.18
 Nodes (10): ADR-NNN: Decision Title, Consequences, Context, Date, Decision, Option A: [name], Option B: [name], Options Considered (+2 more)
 
-### Community 13 - "load_decisions"
-Cohesion: 0.15
-Nodes (17): build_timeline_chains(), command_timeline(), due_reviews(), filter_decisions(), format_table(), format_timeline(), load_decisions(), Any (+9 more)
+### Community 13 - "stub_nodes"
+Cohesion: 0.20
+Nodes (4): fake_redis(), _FakeRedis, stub_nodes(), fixture
 
 ### Community 14 - "compute_next_review"
 Cohesion: 0.28
 Nodes (9): add_months(), compute_next_review(), is_leap_year(), date, Return True when a year is a Gregorian leap year., Compute the next review date for a cadence, or blank for on-trigger., Render a new ADR Markdown document from the embedded template., Add calendar months to a date, clamping the day at month end. (+1 more)
 
 ### Community 15 - "Agent Skills (OpenCode)"
-Cohesion: 0.29
-Nodes (6): Agent Skills (OpenCode), Core Rules, Documentación obligatoria (para siempre documentar las cosas), Execution Model, graphify, Intent → Skill Mapping
+Cohesion: 0.33
+Nodes (5): Agent Skills (OpenCode), Core Rules, Execution Model, graphify, Intent → Skill Mapping
 
 ### Community 16 - "Summarize Meeting"
 Cohesion: 0.33
@@ -142,45 +137,25 @@ Nodes (5): Context, Instructions, Notes, Purpose, Summarize Meeting
 Cohesion: 0.40
 Nodes (3): IMPORTANT: keep the reminder string free of backticks and $(...) constructs., ref_fs, ref_path
 
-### Community 30 - "build_parser"
-Cohesion: 0.19
-Nodes (16): build_parser(), command_due_review(), command_list(), command_new(), command_search(), command_supersede(), ArgumentParser, Handle the new subcommand. (+8 more)
-
-### Community 31 - "Path"
-Cohesion: 0.19
-Nodes (15): add_supersede_link(), adr_glob(), find_adr_path(), next_adr_number(), parse_adr_number(), Path, Read UTF-8 text from a file., Find the ADR file path for a number or raise a clear error. (+7 more)
-
-### Community 32 - "ADR-001: Grafo de organización tipo ramas GitHub con columnas reutilizables por tarea"
-Cohesion: 0.13
-Nodes (14): ADR-001: Grafo de organización tipo ramas GitHub con columnas reutilizables por tarea, Asignación de columnas, Consequences, Context, Date, Decision, Option 1: lane global creciente (estado previo), Option 2: columnas reutilizables por tarea con "columna libre más próxima" (SELECCIONADA) (+6 more)
-
-### Community 33 - "create_decision"
-Cohesion: 0.22
-Nodes (9): create_decision(), DecisionLogError, Create a new sequential ADR file and return its path., Replace the content of the Status section with a new status value., Raised when a decision-log operation cannot be completed., Convert a title to a filesystem-safe kebab-case slug., replace_status(), slugify() (+1 more)
-
-### Community 34 - "Bitácora — Semana del 2026-09-21 al 2026-09-27"
-Cohesion: 0.29
-Nodes (6): Bitácora — Semana del 2026-09-21 al 2026-09-27, Bloqueos que continúan, Desvíos o Bloqueos, Lecciones aprendidas, Logros del periodo, Página de estado
-
 ## Knowledge Gaps
-- **107 isolated node(s):** `$schema`, `plugins`, `Overview`, `Quick start`, `When to create an ADR` (+102 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 265 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **90 isolated node(s):** `$schema`, `plugins`, `Overview`, `Quick start`, `When to create an ADR` (+85 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 246 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **What connects `$schema`, `plugins`, `Overview` to the rest of the system?**
-  _107 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _90 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `decision_log.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.14736842105263157 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.052289815447710185 - nodes in this community are weakly interconnected._
 - **Should `graph.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.05844155844155844 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06458635703918723 - nodes in this community are weakly interconnected._
 - **Should `main.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.06090808416389812 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07057057057057058 - nodes in this community are weakly interconnected._
 - **Should `agent.py` be split into smaller, more focused modules?**
   _Cohesion score 0.0761904761904762 - nodes in this community are weakly interconnected._
 - **Should `test_decision_log.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.08712121212121213 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0907258064516129 - nodes in this community are weakly interconnected._
 - **Should `review_checker.py` be split into smaller, more focused modules?**
   _Cohesion score 0.1010752688172043 - nodes in this community are weakly interconnected._

@@ -4,6 +4,19 @@
   "graph": {},
   "nodes": [
     {
+      "id": "agents_skills_decision_log_scripts_decision_log_decisionlogerror",
+      "label": "DecisionLogError",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "decisionlogerror",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L58"
+    },
+    {
       "id": "backend_orchestrator_graph_researchstate",
       "label": "ResearchState",
       "_callable": true,
@@ -22,8 +35,8 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
+      "community": 13,
+      "community_name": "stub_nodes",
       "file_type": "code",
       "norm_label": "_fakeredis",
       "source_file": "backend/tests/test_graph.py",
@@ -69,19 +82,6 @@
       "source_location": "L41"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_decisionlogerror",
-      "label": "DecisionLogError",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "code",
-      "norm_label": "decisionlogerror",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L58"
-    },
-    {
       "id": "agents_skills_decision_log_tests_test_decision_log_tempdecisionlog",
       "label": "TempDecisionLog",
       "_callable": true,
@@ -93,6 +93,210 @@
       "norm_label": "tempdecisionlog",
       "source_file": ".agents/skills/decision-log/tests/test_decision_log.py",
       "source_location": "L18"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_add_supersede_link",
+      "label": "add_supersede_link()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "add_supersede_link()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L282"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_adr_glob",
+      "label": "adr_glob()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "adr_glob()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L74"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_build_parser",
+      "label": "build_parser()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "build_parser()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L436"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_build_timeline_chains",
+      "label": "build_timeline_chains()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "build_timeline_chains()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L338"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_command_due_review",
+      "label": "command_due_review()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "command_due_review()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L410"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_command_list",
+      "label": "command_list()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "command_list()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L384"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_command_new",
+      "label": "command_new()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "command_new()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L376"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_command_search",
+      "label": "command_search()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "command_search()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L398"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_command_supersede",
+      "label": "command_supersede()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "command_supersede()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L391"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_command_timeline",
+      "label": "command_timeline()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "command_timeline()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L422"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_create_decision",
+      "label": "create_decision()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "create_decision()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L138"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_due_reviews",
+      "label": "due_reviews()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "due_reviews()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L317"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_filter_decisions",
+      "label": "filter_decisions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "filter_decisions()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L231"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_find_adr_path",
+      "label": "find_adr_path()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "find_adr_path()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L261"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_format_table",
+      "label": "format_table()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "format_table()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L246"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_format_timeline",
+      "label": "format_timeline()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "format_timeline()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L366"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_load_decisions",
+      "label": "load_decisions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "load_decisions()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L226"
     },
     {
       "id": "agents_skills_decision_log_scripts_decision_log_main",
@@ -107,6 +311,18 @@
       "source_location": "L480"
     },
     {
+      "id": "agents_skills_decision_log_scripts_decision_log_next_adr_number",
+      "label": "next_adr_number()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "next_adr_number()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L88"
+    },
+    {
       "id": "agents_skills_decision_log_scripts_decision_log_normalized_status",
       "label": "normalized_status()",
       "_callable": true,
@@ -117,6 +333,18 @@
       "norm_label": "normalized_status()",
       "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
       "source_location": "L171"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_parse_adr_number",
+      "label": "parse_adr_number()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "parse_adr_number()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L80"
     },
     {
       "id": "agents_skills_decision_log_scripts_decision_log_parse_date",
@@ -191,6 +419,54 @@
       "source_location": "L186"
     },
     {
+      "id": "agents_skills_decision_log_scripts_decision_log_read_text",
+      "label": "read_text()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "read_text()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L152"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_replace_status",
+      "label": "replace_status()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "replace_status()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L272"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_resolve_decisions_dir",
+      "label": "resolve_decisions_dir()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "resolve_decisions_dir()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L62"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_search_decisions",
+      "label": "search_decisions()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "search_decisions()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L301"
+    },
+    {
       "id": "agents_skills_decision_log_scripts_decision_log_section_after_heading",
       "label": "section_after_heading()",
       "_callable": true,
@@ -201,6 +477,42 @@
       "norm_label": "section_after_heading()",
       "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
       "source_location": "L157"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_slugify",
+      "label": "slugify()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "slugify()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L68"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_supersede_decision",
+      "label": "supersede_decision()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "supersede_decision()",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L290"
+    },
+    {
+      "id": "backend_bus_redis_client_get_sync",
+      "label": "get_sync()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "graph.py",
+      "file_type": "code",
+      "norm_label": "get_sync()",
+      "source_file": "backend/bus/redis_client.py",
+      "source_location": "L20"
     },
     {
       "id": "backend_bus_redis_client_publish_event",
@@ -419,102 +731,6 @@
       "source_location": "L95"
     },
     {
-      "id": "backend_tests_test_graph_fake_redis",
-      "label": "fake_redis()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": "fake_redis()",
-      "source_file": "backend/tests/test_graph.py",
-      "source_location": "L17"
-    },
-    {
-      "id": "backend_tests_test_graph_fake_redis_fake_publish_event",
-      "label": "fake_publish_event()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": "fake_publish_event()",
-      "source_file": "backend/tests/test_graph.py",
-      "source_location": "L20"
-    },
-    {
-      "id": "backend_tests_test_graph_fakeredis_init",
-      "label": ".__init__()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": ".__init__()",
-      "source_file": "backend/tests/test_graph.py",
-      "source_location": "L9"
-    },
-    {
-      "id": "backend_tests_test_graph_fakeredis_publish",
-      "label": ".publish()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": ".publish()",
-      "source_file": "backend/tests/test_graph.py",
-      "source_location": "L12"
-    },
-    {
-      "id": "backend_tests_test_graph_stub_nodes",
-      "label": "stub_nodes()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": "stub_nodes()",
-      "source_file": "backend/tests/test_graph.py",
-      "source_location": "L28"
-    },
-    {
-      "id": "backend_tests_test_graph_stub_nodes_fake_chat",
-      "label": "fake_chat()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": "fake_chat()",
-      "source_file": "backend/tests/test_graph.py",
-      "source_location": "L35"
-    },
-    {
-      "id": "backend_tests_test_graph_stub_nodes_fake_plan",
-      "label": "fake_plan()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": "fake_plan()",
-      "source_file": "backend/tests/test_graph.py",
-      "source_location": "L29"
-    },
-    {
-      "id": "backend_tests_test_graph_stub_nodes_fake_search",
-      "label": "fake_search()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": "fake_search()",
-      "source_file": "backend/tests/test_graph.py",
-      "source_location": "L32"
-    },
-    {
       "id": "backend_tests_test_graph_test_pipeline_publishes_and_synthesizes",
       "label": "test_pipeline_publishes_and_synthesizes()",
       "_callable": true,
@@ -551,100 +767,100 @@
       "source_location": "L72"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_build_timeline_chains",
-      "label": "build_timeline_chains()",
+      "id": "backend_tests_test_graph_fake_redis",
+      "label": "fake_redis()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "build_timeline_chains()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L338"
+      "norm_label": "fake_redis()",
+      "source_file": "backend/tests/test_graph.py",
+      "source_location": "L17"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_command_timeline",
-      "label": "command_timeline()",
+      "id": "backend_tests_test_graph_fake_redis_fake_publish_event",
+      "label": "fake_publish_event()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "command_timeline()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L422"
+      "norm_label": "fake_publish_event()",
+      "source_file": "backend/tests/test_graph.py",
+      "source_location": "L20"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_due_reviews",
-      "label": "due_reviews()",
+      "id": "backend_tests_test_graph_fakeredis_init",
+      "label": ".__init__()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "due_reviews()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L317"
+      "norm_label": ".__init__()",
+      "source_file": "backend/tests/test_graph.py",
+      "source_location": "L9"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_filter_decisions",
-      "label": "filter_decisions()",
+      "id": "backend_tests_test_graph_fakeredis_publish",
+      "label": ".publish()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "filter_decisions()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L231"
+      "norm_label": ".publish()",
+      "source_file": "backend/tests/test_graph.py",
+      "source_location": "L12"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_format_table",
-      "label": "format_table()",
+      "id": "backend_tests_test_graph_stub_nodes",
+      "label": "stub_nodes()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "format_table()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L246"
+      "norm_label": "stub_nodes()",
+      "source_file": "backend/tests/test_graph.py",
+      "source_location": "L28"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_format_timeline",
-      "label": "format_timeline()",
+      "id": "backend_tests_test_graph_stub_nodes_fake_chat",
+      "label": "fake_chat()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "format_timeline()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L366"
+      "norm_label": "fake_chat()",
+      "source_file": "backend/tests/test_graph.py",
+      "source_location": "L35"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_load_decisions",
-      "label": "load_decisions()",
+      "id": "backend_tests_test_graph_stub_nodes_fake_plan",
+      "label": "fake_plan()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "load_decisions()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L226"
+      "norm_label": "fake_plan()",
+      "source_file": "backend/tests/test_graph.py",
+      "source_location": "L29"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_search_decisions",
-      "label": "search_decisions()",
+      "id": "backend_tests_test_graph_stub_nodes_fake_search",
+      "label": "fake_search()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "search_decisions()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L301"
+      "norm_label": "fake_search()",
+      "source_file": "backend/tests/test_graph.py",
+      "source_location": "L32"
     },
     {
       "id": "agents_skills_decision_log_scripts_decision_log_add_months",
@@ -765,18 +981,6 @@
       "norm_label": "index()",
       "source_file": "backend/api/main.py",
       "source_location": "L27"
-    },
-    {
-      "id": "backend_bus_redis_client_get_sync",
-      "label": "get_sync()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "main.py",
-      "file_type": "code",
-      "norm_label": "get_sync()",
-      "source_file": "backend/bus/redis_client.py",
-      "source_location": "L20"
     },
     {
       "id": "backend_config_get",
@@ -1029,210 +1233,6 @@
       "norm_label": "delegate_complex_task()",
       "source_file": "backend/voice/tools.py",
       "source_location": "L12"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_build_parser",
-      "label": "build_parser()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "build_parser()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L436"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_command_due_review",
-      "label": "command_due_review()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "command_due_review()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L410"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_command_list",
-      "label": "command_list()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "command_list()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L384"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_command_new",
-      "label": "command_new()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "command_new()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L376"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_command_search",
-      "label": "command_search()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "command_search()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L398"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_command_supersede",
-      "label": "command_supersede()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "command_supersede()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L391"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_resolve_decisions_dir",
-      "label": "resolve_decisions_dir()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "resolve_decisions_dir()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L62"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_add_supersede_link",
-      "label": "add_supersede_link()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "code",
-      "norm_label": "add_supersede_link()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L282"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_adr_glob",
-      "label": "adr_glob()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "code",
-      "norm_label": "adr_glob()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L74"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_find_adr_path",
-      "label": "find_adr_path()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "code",
-      "norm_label": "find_adr_path()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L261"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_next_adr_number",
-      "label": "next_adr_number()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "code",
-      "norm_label": "next_adr_number()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L88"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_parse_adr_number",
-      "label": "parse_adr_number()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "code",
-      "norm_label": "parse_adr_number()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L80"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_read_text",
-      "label": "read_text()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "code",
-      "norm_label": "read_text()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L152"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_supersede_decision",
-      "label": "supersede_decision()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "code",
-      "norm_label": "supersede_decision()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L290"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_create_decision",
-      "label": "create_decision()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "code",
-      "norm_label": "create_decision()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L138"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_replace_status",
-      "label": "replace_status()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "code",
-      "norm_label": "replace_status()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L272"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_slugify",
-      "label": "slugify()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "code",
-      "norm_label": "slugify()",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L68"
     },
     {
       "id": "agents_skills_decision_log_tests_test_decision_log_make_log",
@@ -1522,6 +1522,83 @@
       "source_location": "L1"
     },
     {
+      "id": "agents_skills_decision_log_scripts_decision_log_py_any",
+      "label": "Any",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "any",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_py_argumentparser",
+      "label": "ArgumentParser",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "argumentparser",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_py_path",
+      "label": "Path",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "path",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "exception",
+      "label": "Exception",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "exception",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "namespace",
+      "label": "Namespace",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "code",
+      "norm_label": "namespace",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_139",
+      "label": "Create a new sequential ADR file and return its path.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "create a new sequential adr file and return its path.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L139"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_153",
+      "label": "Read UTF-8 text from a file.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "read utf-8 text from a file.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L153"
+    },
+    {
       "id": "agents_skills_decision_log_scripts_decision_log_rationale_158",
       "label": "Return the body text immediately following a Markdown level-2 heading.",
       "_origin": "ast",
@@ -1621,6 +1698,204 @@
       "source_location": "L208"
     },
     {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_227",
+      "label": "Load all ADR metadata from a decisions directory.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "load all adr metadata from a decisions directory.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L227"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_234",
+      "label": "Filter decision metadata by status family and free-text topic.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "filter decision metadata by status family and free-text topic.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L234"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_247",
+      "label": "Format decisions as a simple Markdown-like table.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "format decisions as a simple markdown-like table.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L247"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_262",
+      "label": "Find the ADR file path for a number or raise a clear error.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "find the adr file path for a number or raise a clear error.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L262"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_273",
+      "label": "Replace the content of the Status section with a new status value.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "replace the content of the status section with a new status value.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L273"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_283",
+      "label": "Add or update a link from a superseded ADR to the replacing ADR.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "add or update a link from a superseded adr to the replacing adr.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L283"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_291",
+      "label": "Mark one ADR as superseded by another ADR and add a backlink.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "mark one adr as superseded by another adr and add a backlink.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L291"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_302",
+      "label": "Search ADR files for a query and return matching decisions with context\u2026",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "search adr files for a query and return matching decisions with context...",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L302"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_318",
+      "label": "Return ADRs with a next review date on or before today.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "return adrs with a next review date on or before today.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L318"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_339",
+      "label": "Build superseding chains from parsed ADR metadata.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "build superseding chains from parsed adr metadata.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L339"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_367",
+      "label": "Format superseding chains for CLI output.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "format superseding chains for cli output.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L367"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_377",
+      "label": "Handle the new subcommand.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "handle the new subcommand.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L377"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_385",
+      "label": "Handle the list subcommand.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "handle the list subcommand.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L385"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_392",
+      "label": "Handle the supersede subcommand.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "handle the supersede subcommand.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L392"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_399",
+      "label": "Handle the search subcommand.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "handle the search subcommand.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L399"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_411",
+      "label": "Handle the due-review subcommand.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "handle the due-review subcommand.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L411"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_423",
+      "label": "Handle the timeline subcommand.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "handle the timeline subcommand.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L423"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_437",
+      "label": "Build and return the command-line parser.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "build and return the command-line parser.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L437"
+    },
+    {
       "id": "agents_skills_decision_log_scripts_decision_log_rationale_481",
       "label": "Run the decision-log CLI.",
       "_origin": "ast",
@@ -1632,6 +1907,72 @@
       "source_location": "L481"
     },
     {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_59",
+      "label": "Raised when a decision-log operation cannot be completed.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "raised when a decision-log operation cannot be completed.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L59"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_63",
+      "label": "Return the decisions directory from an argument, environment, or default.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "return the decisions directory from an argument, environment, or default.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L63"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_69",
+      "label": "Convert a title to a filesystem-safe kebab-case slug.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "convert a title to a filesystem-safe kebab-case slug.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L69"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_75",
+      "label": "Return all ADR Markdown files in numeric order.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "return all adr markdown files in numeric order.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L75"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_81",
+      "label": "Extract an ADR number from a file path or return None.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "extract an adr number from a file path or return none.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L81"
+    },
+    {
+      "id": "agents_skills_decision_log_scripts_decision_log_rationale_89",
+      "label": "Return the next available ADR number for a directory.",
+      "_origin": "ast",
+      "community": 0,
+      "community_name": "decision_log.py",
+      "file_type": "rationale",
+      "norm_label": "return the next available adr number for a directory.",
+      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
+      "source_location": "L89"
+    },
+    {
       "id": "asyncio",
       "label": "asyncio",
       "_origin": "ast",
@@ -1641,6 +1982,17 @@
       "norm_label": "asyncio",
       "source_file": "",
       "source_location": ""
+    },
+    {
+      "id": "backend_bus_redis_client",
+      "label": "redis_client.py",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "graph.py",
+      "file_type": "code",
+      "norm_label": "redis_client.py",
+      "source_file": "backend/bus/redis_client.py",
+      "source_location": "L1"
     },
     {
       "id": "backend_bus_redis_client_py_any",
@@ -1709,17 +2061,6 @@
       "source_location": "L1"
     },
     {
-      "id": "fixture",
-      "label": "fixture",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "graph.py",
-      "file_type": "code",
-      "norm_label": "fixture",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
       "id": "send",
       "label": "Send",
       "_origin": "ast",
@@ -1727,6 +2068,17 @@
       "community_name": "graph.py",
       "file_type": "code",
       "norm_label": "send",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "syncredis",
+      "label": "SyncRedis",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "graph.py",
+      "file_type": "code",
+      "norm_label": "syncredis",
       "source_file": "",
       "source_location": ""
     },
@@ -2216,103 +2568,15 @@
       "source_location": "L3"
     },
     {
-      "id": "agents_skills_decision_log_scripts_decision_log_py_any",
-      "label": "Any",
+      "id": "fixture",
+      "label": "fixture",
       "_origin": "ast",
       "community": 13,
-      "community_name": "load_decisions",
+      "community_name": "stub_nodes",
       "file_type": "code",
-      "norm_label": "any",
+      "norm_label": "fixture",
       "source_file": "",
       "source_location": ""
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_227",
-      "label": "Load all ADR metadata from a decisions directory.",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "load_decisions",
-      "file_type": "rationale",
-      "norm_label": "load all adr metadata from a decisions directory.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L227"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_234",
-      "label": "Filter decision metadata by status family and free-text topic.",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "load_decisions",
-      "file_type": "rationale",
-      "norm_label": "filter decision metadata by status family and free-text topic.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L234"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_247",
-      "label": "Format decisions as a simple Markdown-like table.",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "load_decisions",
-      "file_type": "rationale",
-      "norm_label": "format decisions as a simple markdown-like table.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L247"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_302",
-      "label": "Search ADR files for a query and return matching decisions with context\u2026",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "load_decisions",
-      "file_type": "rationale",
-      "norm_label": "search adr files for a query and return matching decisions with context...",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L302"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_318",
-      "label": "Return ADRs with a next review date on or before today.",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "load_decisions",
-      "file_type": "rationale",
-      "norm_label": "return adrs with a next review date on or before today.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L318"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_339",
-      "label": "Build superseding chains from parsed ADR metadata.",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "load_decisions",
-      "file_type": "rationale",
-      "norm_label": "build superseding chains from parsed adr metadata.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L339"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_367",
-      "label": "Format superseding chains for CLI output.",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "load_decisions",
-      "file_type": "rationale",
-      "norm_label": "format superseding chains for cli output.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L367"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_423",
-      "label": "Handle the timeline subcommand.",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "load_decisions",
-      "file_type": "rationale",
-      "norm_label": "handle the timeline subcommand.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L423"
     },
     {
       "id": "agents_skills_decision_log_scripts_decision_log_py_date",
@@ -2406,18 +2670,6 @@
       "source_location": "L5"
     },
     {
-      "id": "agents_documentaci\u00f3n_obligatoria_para_siempre_documentar_las_cosas",
-      "label": "Documentaci\u00f3n obligatoria (para siempre documentar las cosas)",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "Agent Skills (OpenCode)",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "documentacion obligatoria (para siempre documentar las cosas)",
-      "source_file": "AGENTS.md",
-      "source_location": "L31"
-    },
-    {
       "id": "agents_execution_model",
       "label": "Execution Model",
       "_origin": "ast",
@@ -2427,7 +2679,7 @@
       "node_kind": "heading",
       "norm_label": "execution model",
       "source_file": "AGENTS.md",
-      "source_location": "L44"
+      "source_location": "L30"
     },
     {
       "id": "agents_graphify",
@@ -2439,7 +2691,7 @@
       "node_kind": "heading",
       "norm_label": "graphify",
       "source_file": "AGENTS.md",
-      "source_location": "L53"
+      "source_location": "L39"
     },
     {
       "id": "agents_intent_skill_mapping",
@@ -2607,17 +2859,6 @@
       "source_location": "L1"
     },
     {
-      "id": "backend_bus_redis_client",
-      "label": "redis_client.py",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "main.py",
-      "file_type": "code",
-      "norm_label": "redis_client.py",
-      "source_file": "backend/bus/redis_client.py",
-      "source_location": "L1"
-    },
-    {
       "id": "backend_config",
       "label": "config.py",
       "_origin": "ast",
@@ -2680,17 +2921,6 @@
       "community_name": "main.py",
       "file_type": "code",
       "norm_label": "streamingresponse",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "syncredis",
-      "label": "SyncRedis",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "main.py",
-      "file_type": "code",
-      "norm_label": "syncredis",
       "source_file": "",
       "source_location": ""
     },
@@ -3023,512 +3253,6 @@
       "norm_label": "delega un objetivo complejo a un equipo de subagentes que trabajan en segundo...",
       "source_file": "backend/voice/tools.py",
       "source_location": "L13"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_py_argumentparser",
-      "label": "ArgumentParser",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "argumentparser",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "namespace",
-      "label": "Namespace",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "code",
-      "norm_label": "namespace",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_377",
-      "label": "Handle the new subcommand.",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "rationale",
-      "norm_label": "handle the new subcommand.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L377"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_385",
-      "label": "Handle the list subcommand.",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "rationale",
-      "norm_label": "handle the list subcommand.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L385"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_392",
-      "label": "Handle the supersede subcommand.",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "rationale",
-      "norm_label": "handle the supersede subcommand.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L392"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_399",
-      "label": "Handle the search subcommand.",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "rationale",
-      "norm_label": "handle the search subcommand.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L399"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_411",
-      "label": "Handle the due-review subcommand.",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "rationale",
-      "norm_label": "handle the due-review subcommand.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L411"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_437",
-      "label": "Build and return the command-line parser.",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "rationale",
-      "norm_label": "build and return the command-line parser.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L437"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_63",
-      "label": "Return the decisions directory from an argument, environment, or default.",
-      "_origin": "ast",
-      "community": 30,
-      "community_name": "build_parser",
-      "file_type": "rationale",
-      "norm_label": "return the decisions directory from an argument, environment, or default.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L63"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_py_path",
-      "label": "Path",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "code",
-      "norm_label": "path",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_153",
-      "label": "Read UTF-8 text from a file.",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "rationale",
-      "norm_label": "read utf-8 text from a file.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L153"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_262",
-      "label": "Find the ADR file path for a number or raise a clear error.",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "rationale",
-      "norm_label": "find the adr file path for a number or raise a clear error.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L262"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_283",
-      "label": "Add or update a link from a superseded ADR to the replacing ADR.",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "rationale",
-      "norm_label": "add or update a link from a superseded adr to the replacing adr.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L283"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_291",
-      "label": "Mark one ADR as superseded by another ADR and add a backlink.",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "rationale",
-      "norm_label": "mark one adr as superseded by another adr and add a backlink.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L291"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_75",
-      "label": "Return all ADR Markdown files in numeric order.",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "rationale",
-      "norm_label": "return all adr markdown files in numeric order.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L75"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_81",
-      "label": "Extract an ADR number from a file path or return None.",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "rationale",
-      "norm_label": "extract an adr number from a file path or return none.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L81"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_89",
-      "label": "Return the next available ADR number for a directory.",
-      "_origin": "ast",
-      "community": 31,
-      "community_name": "Path",
-      "file_type": "rationale",
-      "norm_label": "return the next available adr number for a directory.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L89"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "label": "ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "adr-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "label": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "adr-001: grafo de organizacion tipo ramas github con columnas reutilizables por tarea",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_asignaci\u00f3n_de_columnas",
-      "label": "Asignaci\u00f3n de columnas",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "asignacion de columnas",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L41"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_consequences",
-      "label": "Consequences",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "consequences",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L69"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_context",
-      "label": "Context",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "context",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L9"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_date",
-      "label": "Date",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "date",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L6"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_decision",
-      "label": "Decision",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "decision",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L55"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_1_lane_global_creciente_estado_previo",
-      "label": "Option 1: lane global creciente (estado previo)",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "option 1: lane global creciente (estado previo)",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L43"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_2_columnas_reutilizables_por_tarea_con_columna_libre_m\u00e1s_pr\u00f3xima_seleccionada",
-      "label": "Option 2: columnas reutilizables por tarea con \"columna libre m\u00e1s pr\u00f3xima\" (SELECCIONADA)",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "option 2: columnas reutilizables por tarea con \"columna libre mas proxima\" (seleccionada)",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L47"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_a_diagonales_redondeadas_estilo_github",
-      "label": "Option A: Diagonales redondeadas estilo GitHub",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "option a: diagonales redondeadas estilo github",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L26"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_b_curva_fluida_en_s_u_con_splines_cuadr\u00e1ticas_seleccionada",
-      "label": "Option B: Curva fluida en S/U con splines cuadr\u00e1ticas (SELECCIONADA)",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "option b: curva fluida en s/u con splines cuadraticas (seleccionada)",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L31"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_c_mantener_el_trapecio_con_esquinas_redondeadas",
-      "label": "Option C: Mantener el trapecio con esquinas redondeadas",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "option c: mantener el trapecio con esquinas redondeadas",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L37"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_options_considered",
-      "label": "Options Considered",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "options considered",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L24"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_review",
-      "label": "Review",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "review",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L84"
-    },
-    {
-      "id": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_status",
-      "label": "Status",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "ADR-001: Grafo de organizaci\u00f3n tipo ramas GitHub con columnas reutilizables por tarea",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "status",
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L3"
-    },
-    {
-      "id": "exception",
-      "label": "Exception",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "code",
-      "norm_label": "exception",
-      "source_file": "",
-      "source_location": ""
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_139",
-      "label": "Create a new sequential ADR file and return its path.",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "rationale",
-      "norm_label": "create a new sequential adr file and return its path.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L139"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_273",
-      "label": "Replace the content of the Status section with a new status value.",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "rationale",
-      "norm_label": "replace the content of the status section with a new status value.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L273"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_59",
-      "label": "Raised when a decision-log operation cannot be completed.",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "rationale",
-      "norm_label": "raised when a decision-log operation cannot be completed.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L59"
-    },
-    {
-      "id": "agents_skills_decision_log_scripts_decision_log_rationale_69",
-      "label": "Convert a title to a filesystem-safe kebab-case slug.",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "create_decision",
-      "file_type": "rationale",
-      "norm_label": "convert a title to a filesystem-safe kebab-case slug.",
-      "source_file": ".agents/skills/decision-log/scripts/decision_log.py",
-      "source_location": "L69"
-    },
-    {
-      "id": "docs_project_log_2026_09_27",
-      "label": "2026-09-27.md",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "Bit\u00e1cora \u2014 Semana del 2026-09-21 al 2026-09-27",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "2026-09-27.md",
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "docs_project_log_2026_09_27_bit\u00e1cora_semana_del_2026_09_21_al_2026_09_27",
-      "label": "Bit\u00e1cora \u2014 Semana del 2026-09-21 al 2026-09-27",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "Bit\u00e1cora \u2014 Semana del 2026-09-21 al 2026-09-27",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "bitacora \u2014 semana del 2026-09-21 al 2026-09-27",
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "docs_project_log_2026_09_27_bloqueos_que_contin\u00faan",
-      "label": "Bloqueos que contin\u00faan",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "Bit\u00e1cora \u2014 Semana del 2026-09-21 al 2026-09-27",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "bloqueos que continuan",
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L25"
-    },
-    {
-      "id": "docs_project_log_2026_09_27_desv\u00edos_o_bloqueos",
-      "label": "Desv\u00edos o Bloqueos",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "Bit\u00e1cora \u2014 Semana del 2026-09-21 al 2026-09-27",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "desvios o bloqueos",
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L15"
-    },
-    {
-      "id": "docs_project_log_2026_09_27_lecciones_aprendidas",
-      "label": "Lecciones aprendidas",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "Bit\u00e1cora \u2014 Semana del 2026-09-21 al 2026-09-27",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "lecciones aprendidas",
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L19"
-    },
-    {
-      "id": "docs_project_log_2026_09_27_logros_del_periodo",
-      "label": "Logros del periodo",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "Bit\u00e1cora \u2014 Semana del 2026-09-21 al 2026-09-27",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "logros del periodo",
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L8"
-    },
-    {
-      "id": "docs_project_log_2026_09_27_p\u00e1gina_de_estado",
-      "label": "P\u00e1gina de estado",
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "Bit\u00e1cora \u2014 Semana del 2026-09-21 al 2026-09-27",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "pagina de estado",
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L3"
     },
     {
       "id": "agents_skills_decision_log_tests_test_decision_log",
@@ -4712,7 +4436,6 @@
     {
       "id": "backend_orchestrator",
       "label": "backend_orchestrator",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4724,7 +4447,6 @@
     {
       "id": "celery",
       "label": "celery",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4736,7 +4458,6 @@
     {
       "id": "httpx",
       "label": "httpx",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4746,9 +4467,19 @@
       "type": "external"
     },
     {
+      "id": "json",
+      "label": "json",
+      "community": 1,
+      "community_name": "graph.py",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "json",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "langgraph_graph",
       "label": "langgraph_graph",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4760,7 +4491,6 @@
     {
       "id": "langgraph_types",
       "label": "langgraph_types",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4772,7 +4502,6 @@
     {
       "id": "logging",
       "label": "logging",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4784,7 +4513,6 @@
     {
       "id": "operator",
       "label": "operator",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4794,9 +4522,41 @@
       "type": "external"
     },
     {
+      "id": "pytest",
+      "label": "pytest",
+      "community": 1,
+      "community_name": "graph.py",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "pytest",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "redis",
+      "label": "redis",
+      "community": 1,
+      "community_name": "graph.py",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "redis",
+      "source_file": "",
+      "type": "external"
+    },
+    {
+      "id": "redis_asyncio",
+      "label": "redis_asyncio",
+      "community": 1,
+      "community_name": "graph.py",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "redis_asyncio",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "time",
       "label": "time",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4808,7 +4568,6 @@
     {
       "id": "typing",
       "label": "typing",
-      "_origin": "semantic",
       "community": 1,
       "community_name": "graph.py",
       "external": true,
@@ -4820,7 +4579,6 @@
     {
       "id": "ref_fs",
       "label": "ref_fs",
-      "_origin": "semantic",
       "community": 17,
       "community_name": "graphify.js",
       "external": true,
@@ -4832,7 +4590,6 @@
     {
       "id": "ref_path",
       "label": "ref_path",
-      "_origin": "semantic",
       "community": 17,
       "community_name": "graphify.js",
       "external": true,
@@ -4844,7 +4601,6 @@
     {
       "id": "backend_api",
       "label": "backend_api",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4856,7 +4612,6 @@
     {
       "id": "datetime",
       "label": "datetime",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4868,7 +4623,6 @@
     {
       "id": "dotenv",
       "label": "dotenv",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4880,7 +4634,6 @@
     {
       "id": "fastapi",
       "label": "fastapi",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4892,7 +4645,6 @@
     {
       "id": "fastapi_responses",
       "label": "fastapi_responses",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4904,7 +4656,6 @@
     {
       "id": "fastapi_staticfiles",
       "label": "fastapi_staticfiles",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4916,7 +4667,6 @@
     {
       "id": "fastapi_testclient",
       "label": "fastapi_testclient",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4926,21 +4676,8 @@
       "type": "external"
     },
     {
-      "id": "json",
-      "label": "json",
-      "_origin": "semantic",
-      "community": 2,
-      "community_name": "main.py",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "json",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "livekit_api",
       "label": "livekit_api",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4952,7 +4689,6 @@
     {
       "id": "os",
       "label": "os",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4964,7 +4700,6 @@
     {
       "id": "pathlib",
       "label": "pathlib",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4976,7 +4711,6 @@
     {
       "id": "pydantic",
       "label": "pydantic",
-      "_origin": "semantic",
       "community": 2,
       "community_name": "main.py",
       "external": true,
@@ -4986,33 +4720,8 @@
       "type": "external"
     },
     {
-      "id": "redis",
-      "label": "redis",
-      "_origin": "semantic",
-      "community": 2,
-      "community_name": "main.py",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "redis",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "redis_asyncio",
-      "label": "redis_asyncio",
-      "_origin": "semantic",
-      "community": 2,
-      "community_name": "main.py",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "redis_asyncio",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "backend_bus",
       "label": "backend_bus",
-      "_origin": "semantic",
       "community": 3,
       "community_name": "agent.py",
       "external": true,
@@ -5024,7 +4733,6 @@
     {
       "id": "backend_voice",
       "label": "backend_voice",
-      "_origin": "semantic",
       "community": 3,
       "community_name": "agent.py",
       "external": true,
@@ -5036,7 +4744,6 @@
     {
       "id": "livekit",
       "label": "livekit",
-      "_origin": "semantic",
       "community": 3,
       "community_name": "agent.py",
       "external": true,
@@ -5048,7 +4755,6 @@
     {
       "id": "livekit_agents",
       "label": "livekit_agents",
-      "_origin": "semantic",
       "community": 3,
       "community_name": "agent.py",
       "external": true,
@@ -5060,7 +4766,6 @@
     {
       "id": "livekit_plugins",
       "label": "livekit_plugins",
-      "_origin": "semantic",
       "community": 3,
       "community_name": "agent.py",
       "external": true,
@@ -5072,7 +4777,6 @@
     {
       "id": "uuid",
       "label": "uuid",
-      "_origin": "semantic",
       "community": 3,
       "community_name": "agent.py",
       "external": true,
@@ -5082,21 +4786,8 @@
       "type": "external"
     },
     {
-      "id": "pytest",
-      "label": "pytest",
-      "_origin": "semantic",
-      "community": 4,
-      "community_name": "test_decision_log.py",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "pytest",
-      "source_file": "",
-      "type": "external"
-    },
-    {
       "id": "sys",
       "label": "sys",
-      "_origin": "semantic",
       "community": 4,
       "community_name": "test_decision_log.py",
       "external": true,
@@ -5108,7 +4799,6 @@
     {
       "id": "tempfile",
       "label": "tempfile",
-      "_origin": "semantic",
       "community": 4,
       "community_name": "test_decision_log.py",
       "external": true,
@@ -5120,7 +4810,6 @@
     {
       "id": "argparse",
       "label": "argparse",
-      "_origin": "semantic",
       "community": 5,
       "community_name": "review_checker.py",
       "external": true,
@@ -5132,7 +4821,6 @@
     {
       "id": "glob",
       "label": "glob",
-      "_origin": "semantic",
       "community": 5,
       "community_name": "review_checker.py",
       "external": true,
@@ -5144,7 +4832,6 @@
     {
       "id": "re",
       "label": "re",
-      "_origin": "semantic",
       "community": 5,
       "community_name": "review_checker.py",
       "external": true,
@@ -8467,24 +8154,24 @@
     },
     {
       "source": "agents_agent_skills_opencode",
-      "target": "agents_documentaci\u00f3n_obligatoria_para_siempre_documentar_las_cosas",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "agents_agent_skills_opencode",
       "target": "agents_execution_model",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
-      "source_location": "L44",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_agent_skills_opencode",
+      "target": "agents_graphify",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "AGENTS.md",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -8496,17 +8183,6 @@
       "confidence_score": 1.0,
       "source_file": "AGENTS.md",
       "source_location": "L5",
-      "weight": 1.0
-    },
-    {
-      "source": "agents_agent_skills_opencode",
-      "target": "agents_graphify",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "AGENTS.md",
-      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -10666,226 +10342,6 @@
       "weight": 1.0
     },
     {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_options_considered",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L24",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_status",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_decision",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L55",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_date",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L6",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_consequences",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L69",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_review",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L84",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_adr_001_grafo_de_organizaci\u00f3n_tipo_ramas_github_con_columnas_reutilizables_por_tarea",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_context",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_asignaci\u00f3n_de_columnas",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_1_lane_global_creciente_estado_previo",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L43",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_asignaci\u00f3n_de_columnas",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_2_columnas_reutilizables_por_tarea_con_columna_libre_m\u00e1s_pr\u00f3xima_seleccionada",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L47",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_options_considered",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_a_diagonales_redondeadas_estilo_github",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L26",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_options_considered",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_b_curva_fluida_en_s_u_con_splines_cuadr\u00e1ticas_seleccionada",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L31",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_options_considered",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_option_c_mantener_el_trapecio_con_esquinas_redondeadas",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L37",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_options_considered",
-      "target": "docs_decisions_adr_001_grafo_de_organizacion_tipo_ramas_github_con_columnas_reutilizables_por_tarea_asignaci\u00f3n_de_columnas",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md",
-      "source_location": "L41",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_project_log_2026_09_27",
-      "target": "docs_project_log_2026_09_27_bit\u00e1cora_semana_del_2026_09_21_al_2026_09_27",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L1",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_project_log_2026_09_27_bit\u00e1cora_semana_del_2026_09_21_al_2026_09_27",
-      "target": "docs_project_log_2026_09_27_desv\u00edos_o_bloqueos",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L15",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_project_log_2026_09_27_bit\u00e1cora_semana_del_2026_09_21_al_2026_09_27",
-      "target": "docs_project_log_2026_09_27_lecciones_aprendidas",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L19",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_project_log_2026_09_27_bit\u00e1cora_semana_del_2026_09_21_al_2026_09_27",
-      "target": "docs_project_log_2026_09_27_bloqueos_que_contin\u00faan",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L25",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_project_log_2026_09_27_bit\u00e1cora_semana_del_2026_09_21_al_2026_09_27",
-      "target": "docs_project_log_2026_09_27_p\u00e1gina_de_estado",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L3",
-      "weight": 1.0
-    },
-    {
-      "source": "docs_project_log_2026_09_27_bit\u00e1cora_semana_del_2026_09_21_al_2026_09_27",
-      "target": "docs_project_log_2026_09_27_logros_del_periodo",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "docs/project-log/2026-09-27.md",
-      "source_location": "L8",
-      "weight": 1.0
-    },
-    {
       "source": "opencode_opencode",
       "target": "opencode_opencode_schema",
       "relation": "contains",
@@ -12268,5 +11724,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "4e3ad3a14471aadf99eccea2f6cc08f520a7d7f5"
+  "built_at_commit": "d728c1764a79157fc3fc8a332655493d14ab20de"
 }

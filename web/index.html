@@ -86,7 +86,7 @@
     #resizer:hover, #resizer.active { background:#22d3ee; }
     #gitgraph svg { display:block; width:100%; height:auto; }
     .graph-main { fill:none; stroke:#22d3ee; stroke-width:2.5; stroke-linecap:round; }
-    .graph-branch { fill:none; stroke:#a78bfa; stroke-width:2; stroke-linecap:round; }
+    .graph-branch { fill:none; stroke:#a78bfa; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .graph-label { font:10px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill:#94a3b8; }
     .graph-goal { font:600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill:#cbd5e1; }
   </style>
@@ -212,9 +212,9 @@
       const BADGE = { planner: "PLANIFICADOR", research: "SUBAGENTE", synthesize: "SUPERVISOR" };
 
       const NS = "http://www.w3.org/2000/svg";
-      const MAIN_X = 26, LANE_OFF = 36, LANE_GAP = 30, SP = 30, TOP = 16;
-      const FLOW_RATE = 7, FLOW_CAP = 42, START_PAD = 14;
-      const hist = { svg: null, taskBy: {}, order: [], lanes: 0, mainY: TOP, pts: [TOP], flowBase: TOP, flowTs: Date.now() };
+      const MAIN_X = 26, LANE_OFF = 36, LANE_GAP = 30, SP = 34, TOP = 16;
+      const FLOW_RATE = 7, FLOW_CAP = 42, START_PAD = 14, MAX_COLS = 4;
+      const hist = { svg: null, taskBy: {}, order: [], cols: [], mainY: TOP, pts: [TOP], flowBase: TOP, flowTs: Date.now() };
       let lastGoal = "";
 
       // --- Paneles redimensionables ---------------------------------------
@@ -266,6 +266,19 @@
 
       const laneX = (k) => MAIN_X + LANE_OFF + k * LANE_GAP;
 
+      function allocLane() {
+        let idx = hist.cols.indexOf(false);
+        if (idx < 0) idx = hist.cols.length;
+        if (idx >= MAX_COLS) idx = MAX_COLS - 1;
+        while (hist.cols.length <= idx) hist.cols.push(false);
+        hist.cols[idx] = true;
+        return idx;
+      }
+
+      function freeLane(k) {
+        if (k != null && k >= 0 && k < hist.cols.length) hist.cols[k] = false;
+      }
+
       function ensureSvg() {
         if (hist.svg) return;
         const svg = document.createElementNS(NS, "svg");
@@ -276,7 +289,7 @@
       function ensureTask(taskId, ev) {
         let t = hist.taskBy[taskId];
         if (!t) {
-          t = { taskId, goal: ev.goal || lastGoal, planY: null, finalY: null, branches: [], bySubtask: {}, done: false, bannered: false };
+          t = { taskId, goal: ev.goal || lastGoal, planY: null, finalY: null, branches: [], bySubtask: {}, done: false, bannered: false, lane: null, lx: null };
           hist.taskBy[taskId] = t;
           hist.order.push(t);
         }
@@ -329,8 +342,7 @@
       function drawGraph() {
         ensureSvg();
         const svg = hist.svg;
-        const lanes = hist.lanes;
-        const W = (lanes > 0 ? laneX(lanes - 1) : MAIN_X + LANE_OFF) + 430;
+        const W = laneX(MAX_COLS - 1) + 430;
         const H = Math.max(hist.mainY + 90, 140);
         svg.setAttribute("viewBox", "0 0 " + W + " " + H);
         svg.innerHTML = "";
@@ -347,17 +359,21 @@
           addText(svg, trunc(t.goal || t.taskId, 34), MAIN_X + 8, planY - 6, "#cbd5e1", "graph-goal");
           addDot(svg, MAIN_X, planY, "#22d3ee", 4);
 
-          for (const br of t.branches) {
-            const lx = laneX(br.lane);
-            const mergeY = br.mergeY;
-            const tipY = mergeY != null ? mergeY : Math.max(planY + START_PAD, fy);
-            let bd = "M " + MAIN_X + " " + planY + " L " + lx + " " + planY + " L " + lx + " " + tipY;
-            if (mergeY != null) {
-              bd += " C " + lx + " " + (mergeY + 10) + ", " + (lx - 10) + " " + (mergeY + 10) + ", " + (lx - 12) + " " + mergeY + " L " + MAIN_X + " " + mergeY;
-              addDot(svg, MAIN_X, mergeY, "#e2e8f0", 3);
+          if (t.lx != null) {
+            const NEK = Math.min(t.lx - MAIN_X, 13);
+            let sy = planY;
+            for (const br of t.branches) {
+              const mergeY = br.mergeY;
+              const tipY = mergeY != null ? mergeY : Math.max(sy + START_PAD, fy);
+              let bd = "M " + MAIN_X + " " + sy + " Q " + MAIN_X + " " + (sy + NEK) + " " + t.lx + " " + (sy + NEK) + " L " + t.lx + " " + (tipY - NEK);
+              if (mergeY != null) {
+                bd += " Q " + MAIN_X + " " + (mergeY - NEK) + " " + MAIN_X + " " + mergeY;
+                addDot(svg, MAIN_X, mergeY, "#e2e8f0", 3);
+                sy = mergeY;
+              }
+              addPath(svg, bd, "graph-branch");
+              addText(svg, trunc(br.subtask, 28), t.lx + 6, tipY - 6, mergeY != null ? "#a5b4fc" : "#94a3b8");
             }
-            addPath(svg, bd, "graph-branch");
-            addText(svg, trunc(br.subtask, 28), lx + 6, tipY - 4, mergeY != null ? "#a5b4fc" : "#94a3b8");
           }
 
           if (t.finalY != null) {
@@ -377,6 +393,8 @@
 
         if (ev.type === "plan_ready") {
           if (t.planY == null) {
+            t.lane = allocLane();
+            t.lx = laneX(t.lane);
             commitMain();
             t.planY = hist.mainY;
           }
@@ -395,7 +413,7 @@
           }
         }
         if (ev.type === "subtask_started" && !t.bySubtask[ev.subtask]) {
-          const br = { subtask: ev.subtask, lane: hist.lanes++, mergeY: null };
+          const br = { subtask: ev.subtask, mergeY: null };
           t.bySubtask[ev.subtask] = br;
           t.branches.push(br);
         }
@@ -412,6 +430,7 @@
             t.finalY = hist.mainY;
           }
           t.done = true;
+          freeLane(t.lane);
         }
         if (ev.priority === "urgent") {
           if (t.finalY == null) {
@@ -419,6 +438,7 @@
             t.finalY = hist.mainY;
           }
           t.done = true;
+          freeLane(t.lane);
         }
 
         agentLine(ev);
