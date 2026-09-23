@@ -7,13 +7,16 @@ Cada delegación pasa primero por el triaje Sistema 1 (Jev):
 - ``block``: inyección de instrucciones detectada; rechazo cortés, sin enviar.
 - ``propose_commit``: riesgo crítico; se pide confirmación explícita
   (``confirm_execution``) antes de ejecutar.
+- ``cancel_task``: revoca por voz la tarea Celery activa de la sesión.
 """
 
 import logging
+import time
 import uuid
 
 from livekit.agents import RunContext, function_tool
 
+from backend.bus import redis_client
 from backend.decision import respond, router
 from backend.decision.schemas import RouteAction
 from backend.orchestrator import cost
@@ -37,9 +40,13 @@ CONFIRMED_MESSAGE = (
     "Confirmado. He lanzado a mi equipo de subagentes con el objetivo: {goal}. "
     "Te iré avisando por aquí en cuanto tengan avances."
 )
+NO_ACTIVE_TASK_MESSAGE = "No tengo ninguna tarea en curso que cancelar."
+CANCEL_TASK_MESSAGE = "He cancelado la tarea en curso: {goal}."
 
 # Ejecuciones pendientes de confirmación (Propose-Commit), clave: sesión.
 PENDING: dict[str, dict] = {}
+# Tarea Celery activa por sesión, clave: sesión.
+ACTIVE_TASKS: dict[str, dict] = {}
 
 
 def _session_key(ctx) -> str:
@@ -56,8 +63,45 @@ async def _fast_answer(task_id: str, goal: str, model: str) -> str:
 def _dispatch_orchestrator(task_id: str, goal: str) -> None:
     from backend.orchestrator.tasks import celery_app
 
-    celery_app.send_task("run_pipeline", args=[task_id, goal])
+    celery_app.send_task("run_pipeline", args=[task_id, goal], task_id=task_id)
     logger.info("Tarea delegada: task_id=%s goal=%r", task_id, goal)
+
+
+def _revoke_task(task_id: str) -> None:
+    from backend.orchestrator.tasks import celery_app
+
+    celery_app.control.revoke(task_id, terminate=True, signal="SIGTERM")
+
+
+def _register_active(ctx, task_id: str, goal: str) -> None:
+    """Guarda la tarea activa de la sesión, revocando la anterior si existía."""
+    key = _session_key(ctx)
+    previous = ACTIVE_TASKS.pop(key, None)
+    if previous is not None:
+        _safe_revoke(str(previous["task_id"]))
+    ACTIVE_TASKS[key] = {"task_id": task_id, "goal": goal}
+
+
+def _safe_revoke(task_id: str) -> None:
+    try:
+        _revoke_task(task_id)
+    except Exception:  # noqa: BLE001
+        logger.exception("No se pudo revocar la tarea task_id=%s", task_id)
+
+
+async def _publish_task_cancelled(task_id: str, goal: str) -> None:
+    payload = {
+        "task_id": task_id,
+        "type": "task_cancelled",
+        "agent": "orchestrator",
+        "message": f"Tarea cancelada: {goal}",
+        "priority": "info",
+        "ts": int(time.time() * 1000),
+    }
+    try:
+        await redis_client.publish_event(payload)
+    except Exception:  # noqa: BLE001
+        logger.exception("No se pudo publicar task_cancelled task_id=%s", task_id)
 
 
 async def delegate_complex_task_core(ctx, goal: str) -> str:
@@ -76,6 +120,7 @@ async def delegate_complex_task_core(ctx, goal: str) -> str:
     except Exception as exc:  # noqa: BLE001
         logger.exception("No se pudo despachar la tarea a Celery")
         raise RuntimeError(f"No se pudo lanzar el equipo de subagentes: {exc}") from exc
+    _register_active(ctx, task_id, goal)
     return LAUNCH_MESSAGE.format(goal=goal)
 
 
@@ -99,7 +144,20 @@ async def confirm_execution_core(ctx, confirm: bool) -> str:
     except Exception as exc:  # noqa: BLE001
         logger.exception("No se pudo despachar la tarea a Celery")
         raise RuntimeError(f"No se pudo lanzar el equipo de subagentes: {exc}") from exc
+    _register_active(ctx, task_id, goal)
     return CONFIRMED_MESSAGE.format(goal=goal)
+
+
+async def cancel_task_core(ctx) -> str:
+    """Revoca la tarea Celery activa de la sesión y publica ``task_cancelled``."""
+    active = ACTIVE_TASKS.pop(_session_key(ctx), None)
+    if active is None:
+        return NO_ACTIVE_TASK_MESSAGE
+    task_id = str(active["task_id"])
+    goal = str(active["goal"])
+    _safe_revoke(task_id)
+    await _publish_task_cancelled(task_id, goal)
+    return CANCEL_TASK_MESSAGE.format(goal=goal)
 
 
 @function_tool()
@@ -124,5 +182,16 @@ async def confirm_execution(ctx: RunContext, confirm: bool) -> str:
         confirm: True para ejecutar la acción pendiente, False para cancelarla.
     """
     text = await confirm_execution_core(ctx, confirm)
+    await ctx.update(text)
+    return ""
+
+
+@function_tool()
+async def cancel_task(ctx: RunContext) -> str:
+    """Cancela la tarea en curso que los subagentes están ejecutando en segundo
+    plano. Úsala cuando el usuario pida parar, detener o cancelar el trabajo
+    actual.
+    """
+    text = await cancel_task_core(ctx)
     await ctx.update(text)
     return ""

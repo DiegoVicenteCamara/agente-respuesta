@@ -16,6 +16,9 @@ def classify(payload: dict) -> str:
 
 def build_spoken_update(payload: dict) -> str | None:
     """Devuelve el texto a hablar para un evento, o ``None`` si debe callar."""
+    if payload.get("type") == "task_cancelled":
+        # La tool cancel_task ya confirma por voz; el evento solo va al panel.
+        return None
     priority = classify(payload)
     if priority == SILENT:
         return None
