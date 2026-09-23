@@ -38,7 +38,7 @@ class Settings:
             _get("ROUTING_INJECTION_THRESHOLD", "0.85")
         )
         self.routing_confidence_min: float = float(_get("ROUTING_CONFIDENCE_MIN", "0.6"))
-        self.routing_timeout_ms: int = int(_get("ROUTING_TIMEOUT_MS", "600"))
+        self.routing_timeout_ms: int = int(_get("ROUTING_TIMEOUT_MS", "2000"))
 
 
 settings = Settings()
