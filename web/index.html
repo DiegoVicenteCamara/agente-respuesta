@@ -105,6 +105,11 @@
       <button id="mute" disabled>Silenciar</button>
     </div>
 
+    <div class="controls" style="margin-top:8px;">
+      <input id="phone" placeholder="Teléfono E.164 (ej. +34910000000)" autocomplete="off" />
+      <button id="dialPhone" style="background:#4ade80;color:#052e16;">Llamar al teléfono</button>
+    </div>
+
     <p id="status"><span class="dot" id="dot"></span><span id="statusText">Desconectado</span></p>
     <ul id="log"></ul>
 
@@ -196,6 +201,32 @@
       });
 
       hangupBtn.addEventListener("click", () => room.disconnect());
+
+      const phoneInput = document.getElementById("phone");
+      const dialBtn = document.getElementById("dialPhone");
+      dialBtn.addEventListener("click", async () => {
+        const phone = phoneInput.value.trim();
+        if (!phone) {
+          log("Indica un teléfono en formato E.164 (ej. +34910000000)");
+          return;
+        }
+        try {
+          dialBtn.disabled = true;
+          const name = roomInput.value.trim() || "demo";
+          const res = await fetch("/sip/call", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone_number: phone, room: name }),
+          });
+          const body = await res.json();
+          if (!res.ok) throw new Error(body.detail || "error");
+          log("Llamando al " + body.phone_number + " en la sala " + body.room);
+        } catch (err) {
+          log("No se pudo marcar: " + err.message);
+        } finally {
+          dialBtn.disabled = false;
+        }
+      });
 
       muteBtn.addEventListener("click", async () => {
         const hp = room.localParticipant;

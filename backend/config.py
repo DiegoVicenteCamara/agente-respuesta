@@ -55,6 +55,15 @@ class Settings:
             "",
         )
         self.earcon_path: str = _get("EARCON_PATH", "")
+        self.sip_enabled: bool = _get("SIP_ENABLED", "false").lower() not in (
+            "false",
+            "0",
+            "no",
+            "off",
+            "",
+        )
+        self.sip_trunk_id: str = _get("SIP_TRUNK_ID", "")
+        self.sip_number: str = _get("SIP_NUMBER", "") or _get("AGENT_NUMBER", "")
 
     def _load_pricing(self) -> dict[str, tuple[float, float]]:
         defaults = {
