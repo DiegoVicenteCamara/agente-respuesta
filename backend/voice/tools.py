@@ -43,14 +43,75 @@ CONFIRMED_MESSAGE = (
 NO_ACTIVE_TASK_MESSAGE = "No tengo ninguna tarea en curso que cancelar."
 CANCEL_TASK_MESSAGE = "He cancelado la tarea en curso: {goal}."
 
-# Ejecuciones pendientes de confirmación (Propose-Commit), clave: sesión.
-PENDING: dict[str, dict] = {}
-# Tarea Celery activa por sesión, clave: sesión.
-ACTIVE_TASKS: dict[str, dict] = {}
+# Estado de sesión de voz (Propose-Commit + tarea Celery activa).
+# Vive en Redis con TTL para que 2+ workers de voz compartan la misma
+# sesión; la API pública del módulo no cambia.
+SESSION_TTL_SECONDS = 3600
 
 
 def _session_key(ctx) -> str:
-    return f"session-{id(ctx.session)}"
+    """Clave estable de sesión compartible entre workers.
+
+    Orden: userdata explícito -> nombre/sid de la sala LiveKit ->
+    atributo ``session_id`` (fakes/tests) -> ``id()`` como fallback.
+    """
+    session = getattr(ctx, "session", None)
+    try:
+        userdata = getattr(session, "userdata", None)
+        if isinstance(userdata, dict):
+            for field in ("session_id", "room", "room_name", "sid"):
+                value = userdata.get(field)
+                if value:
+                    return f"session-{value}"
+        elif isinstance(userdata, str) and userdata:
+            return f"session-{userdata}"
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        room_io = getattr(session, "room_io", None)
+        room = getattr(room_io, "room", None)
+        if room is not None:
+            name = getattr(room, "name", None) or getattr(room, "sid", None)
+            if name:
+                return f"session-{name}"
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        room = getattr(session, "room", None)
+        if room is not None:
+            name = (
+                getattr(room, "name", None) or getattr(room, "sid", None) or str(room)
+            )
+            if name:
+                return f"session-{name}"
+    except Exception:  # noqa: BLE001
+        pass
+    try:
+        sid = getattr(session, "session_id", None) or getattr(session, "id", None)
+        if isinstance(sid, str) and sid:
+            return f"session-{sid}"
+    except Exception:  # noqa: BLE001
+        pass
+    return f"session-{id(session)}"
+
+
+def _load_state(session_id: str) -> dict:
+    try:
+        data = redis_client.session_get(session_id)
+    except Exception:  # noqa: BLE001
+        logger.exception("No se pudo leer el estado de sesión %s", session_id)
+        return {}
+    return dict(data) if isinstance(data, dict) else {}
+
+
+def _save_state(session_id: str, state: dict) -> None:
+    try:
+        if not state.get("pending") and not state.get("active"):
+            redis_client.session_delete(session_id)
+        else:
+            redis_client.session_set(session_id, state, SESSION_TTL_SECONDS)
+    except Exception:  # noqa: BLE001
+        logger.exception("No se pudo guardar el estado de sesión %s", session_id)
 
 
 async def _fast_answer(task_id: str, goal: str, model: str) -> str:
@@ -75,11 +136,17 @@ def _revoke_task(task_id: str) -> None:
 
 def _register_active(ctx, task_id: str, goal: str) -> None:
     """Guarda la tarea activa de la sesión, revocando la anterior si existía."""
-    key = _session_key(ctx)
-    previous = ACTIVE_TASKS.pop(key, None)
-    if previous is not None:
+    session_id = _session_key(ctx)
+    state = _load_state(session_id)
+    _set_active_in_state(state, task_id, goal)
+    _save_state(session_id, state)
+
+
+def _set_active_in_state(state: dict, task_id: str, goal: str) -> None:
+    previous = state.get("active")
+    if isinstance(previous, dict) and previous.get("task_id"):
         _safe_revoke(str(previous["task_id"]))
-    ACTIVE_TASKS[key] = {"task_id": task_id, "goal": goal}
+    state["active"] = {"task_id": task_id, "goal": goal}
 
 
 def _safe_revoke(task_id: str) -> None:
@@ -113,7 +180,10 @@ async def delegate_complex_task_core(ctx, goal: str) -> str:
     if decision.action == RouteAction.BLOCK:
         return BLOCK_MESSAGE
     if decision.action == RouteAction.PROPOSE_COMMIT:
-        PENDING[_session_key(ctx)] = {"goal": goal}
+        session_id = _session_key(ctx)
+        state = _load_state(session_id)
+        state["pending"] = {"goal": goal}
+        _save_state(session_id, state)
         return PROPOSE_MESSAGE.format(goal=goal)
     try:
         _dispatch_orchestrator(task_id, goal)
@@ -126,37 +196,46 @@ async def delegate_complex_task_core(ctx, goal: str) -> str:
 
 async def confirm_execution_core(ctx, confirm: bool) -> str:
     """Resuelve una ejecución pendiente de Propose-Commit según la confirmación."""
-    key = _session_key(ctx)
-    pending = PENDING.pop(key, None)
-    if pending is None:
+    session_id = _session_key(ctx)
+    state = _load_state(session_id)
+    pending = state.pop("pending", None)
+    if not isinstance(pending, dict) or not pending.get("goal"):
         return NO_PENDING_MESSAGE
     if not confirm:
+        _save_state(session_id, state)
         return CANCELLED_MESSAGE
     goal = str(pending["goal"])
     task_id = str(uuid.uuid4())
     decision = await router.route(task_id, goal)
     if decision.action == RouteAction.BLOCK:
+        _save_state(session_id, state)
         return BLOCK_MESSAGE
     if decision.action == RouteAction.FAST:
+        _save_state(session_id, state)
         return await _fast_answer(task_id, goal, decision.model)
     try:
         _dispatch_orchestrator(task_id, goal)
     except Exception as exc:  # noqa: BLE001
         logger.exception("No se pudo despachar la tarea a Celery")
+        _save_state(session_id, state)
         raise RuntimeError(f"No se pudo lanzar el equipo de subagentes: {exc}") from exc
-    _register_active(ctx, task_id, goal)
+    _set_active_in_state(state, task_id, goal)
+    _save_state(session_id, state)
     return CONFIRMED_MESSAGE.format(goal=goal)
 
 
 async def cancel_task_core(ctx) -> str:
     """Revoca la tarea Celery activa de la sesión y publica ``task_cancelled``."""
-    active = ACTIVE_TASKS.pop(_session_key(ctx), None)
-    if active is None:
+    session_id = _session_key(ctx)
+    state = _load_state(session_id)
+    active = state.pop("active", None)
+    if not isinstance(active, dict) or not active.get("task_id"):
         return NO_ACTIVE_TASK_MESSAGE
     task_id = str(active["task_id"])
-    goal = str(active["goal"])
+    goal = str(active.get("goal", ""))
     _safe_revoke(task_id)
     await _publish_task_cancelled(task_id, goal)
+    _save_state(session_id, state)
     return CANCEL_TASK_MESSAGE.format(goal=goal)
 
 
