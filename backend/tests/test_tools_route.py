@@ -100,7 +100,7 @@ def patch_quick_answer(monkeypatch):
 def recorded_dispatch(monkeypatch):
     calls: list[tuple[str, str]] = []
 
-    def fake_dispatch(task_id: str, goal: str) -> None:
+    def fake_dispatch(task_id: str, goal: str, user_id: str | None = None) -> None:
         calls.append((task_id, goal))
 
     monkeypatch.setattr(tools, "_dispatch_orchestrator", fake_dispatch)

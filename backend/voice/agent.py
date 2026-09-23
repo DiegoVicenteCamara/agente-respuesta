@@ -17,7 +17,9 @@ from livekit.plugins import openai
 
 from backend.bus import redis_client
 from backend.config import settings
+from backend.memory import service as memory_service
 from backend.voice import notifier
+from backend.voice import tools
 from backend.voice.earcon import play_earcon
 from backend.voice.tools import cancel_task, confirm_execution, delegate_complex_task
 
@@ -57,6 +59,45 @@ class OrchestratorAgent(Agent):
         )
 
 
+def _resolve_user_id(ctx: JobContext) -> str:
+    """Resuelve la identidad: participante > claims del token > ``anonymous``.
+
+    Nunca eleva excepciones: ante sala vacía o claims ausentes devuelve
+    ``"anonymous"`` para que el flujo siga sin memoria pero sin errores.
+    """
+    try:
+        participants = getattr(getattr(ctx, "room", None), "remote_participants", None)
+        if participants:
+            values = list(participants.values()) if hasattr(participants, "values") else list(participants)
+            for participant in values:
+                identity = getattr(participant, "identity", None)
+                if identity:
+                    return str(identity)
+    except Exception:  # noqa: BLE001
+        logger.debug("No se pudo resolver identidad por participante", exc_info=True)
+    try:
+        claims_fn = getattr(ctx, "token_claims", None)
+        claims = claims_fn() if callable(claims_fn) else None
+        identity = getattr(claims, "identity", None)
+        if isinstance(claims, dict):
+            identity = identity or claims.get("identity")
+        if identity:
+            return str(identity)
+    except Exception:  # noqa: BLE001
+        logger.debug("No se pudo resolver identidad por claims", exc_info=True)
+    return "anonymous"
+
+
+def build_welcome_instructions(memory: str | None) -> str:
+    """Compone el saludo: con memoria menciona el trabajo previo, sin ella la base."""
+    if memory and str(memory).strip():
+        return (
+            f"{WELCOME_INSTRUCTIONS} La última vez investigaste "
+            f"{str(memory).strip()} — cuéntame qué necesitas ahora."
+        )
+    return WELCOME_INSTRUCTIONS
+
+
 async def _listen_for_updates(session: AgentSession) -> None:
     """Escucha eventos de los subagentes y habla proactivamente."""
     client = redis_client.get_async()
@@ -88,11 +129,29 @@ server = AgentServer()
 
 
 @server.rtc_session(agent_name=settings.agent_name)
-async def voice_entrypoint(ctx: JobContext) -> None:
-    session = AgentSession()
-    await session.start(room=ctx.room, agent=OrchestratorAgent())
+async def voice_entrypoint(
+    ctx: JobContext,
+    *,
+    session_factory=None,
+    agent_factory=None,
+) -> None:
+    """Punto de entrada de voz: identidad, memoria, bienvenida y listener.
+
+    ``session_factory`` / ``agent_factory`` son puntos de inyección para tests
+    (evitan el LLM real de ``AgentSession``/``OrchestratorAgent``).
+    """
+    user_id = _resolve_user_id(ctx)
+    tools.USER_ID.set(None if user_id == "anonymous" else user_id)
+    memory = await memory_service.load(None if user_id == "anonymous" else user_id)
+    welcome = build_welcome_instructions(memory)
+    if memory and user_id != "anonymous":
+        await memory_service.publish_recalled(user_id, memory)
+    make_session = session_factory or AgentSession
+    make_agent = agent_factory or OrchestratorAgent
+    session = make_session()
+    await session.start(room=ctx.room, agent=make_agent())
     asyncio.create_task(_listen_for_updates(session))
-    await session.generate_reply(instructions=WELCOME_INSTRUCTIONS)
+    await session.generate_reply(instructions=welcome)
 
 
 if __name__ == "__main__":

@@ -106,7 +106,7 @@ def _handle_blocked(task_id: str) -> str:
 
 
 @celery_app.task(name="run_pipeline")
-def run_pipeline(task_id: str, goal: str) -> str:
+def run_pipeline(task_id: str, goal: str, user_id: str | None = None) -> str:
     try:
         decision = asyncio.run(router.route(task_id, goal))
         if decision.action == RouteAction.FAST:
