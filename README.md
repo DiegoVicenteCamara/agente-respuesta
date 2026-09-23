@@ -1,5 +1,8 @@
 # Respuesta — Agente de voz con subagentes proactivos
 
+[![Sitio público](https://img.shields.io/badge/sitio-GitHub%20Pages-blue)](https://diegovicentecamara.github.io/agente-respuesta/)
+> **Sitio público (landing):** https://diegovicentecamara.github.io/agente-respuesta/ — pitch, arquitectura, quickstart y docs. La landing enlaza aquí y viceversa (ver [ADR-004](docs/decisions/ADR-004-landing-page-en-github-pages-desde-docs-con-deploy-por-actions.md)).
+
 Un agente de IA que funciona como si estuvieras en una llamada con una persona:
 recibes una llamada desde tu navegador, le pides una tarea compleja (investigar,
 resumir, comparar…) y un **orquestador la descompone y delega a subagentes en
