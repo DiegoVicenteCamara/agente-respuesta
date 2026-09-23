@@ -46,7 +46,9 @@ async def _publish(payload: dict) -> None:
         logger.warning("No se pudo publicar el evento en Redis")
 
 
-def _run_graph(task_id: str, goal: str, planner_model: str | None) -> str:
+def _run_graph(
+    task_id: str, goal: str, planner_model: str | None, user_id: str | None = None
+) -> str:
     from backend.orchestrator.graph import build_graph
 
     async def _inner() -> str:
@@ -56,6 +58,7 @@ def _run_graph(task_id: str, goal: str, planner_model: str | None) -> str:
             initial = {
                 "task_id": task_id,
                 "goal": goal,
+                "user_id": user_id,
                 "results": [],
                 "progress": [],
                 "planner_model": planner_model or "",
@@ -106,7 +109,7 @@ def _handle_blocked(task_id: str) -> str:
 
 
 @celery_app.task(name="run_pipeline")
-def run_pipeline(task_id: str, goal: str) -> str:
+def run_pipeline(task_id: str, goal: str, user_id: str | None = None) -> str:
     try:
         decision = asyncio.run(router.route(task_id, goal))
         if decision.action == RouteAction.FAST:
@@ -115,7 +118,7 @@ def run_pipeline(task_id: str, goal: str) -> str:
             return _handle_blocked(task_id)
         # PROPOSE_COMMIT llega aquí ya confirmado (voz) o directo (debug): se
         # escala al orquestador con el modelo que fijó la política.
-        return _run_graph(task_id, goal, decision.model)
+        return _run_graph(task_id, goal, decision.model, user_id)
     except Exception as exc:  # noqa: BLE001
         logger.exception("Pipeline falló para task_id=%s", task_id)
         raise exc
