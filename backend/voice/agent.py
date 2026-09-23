@@ -17,7 +17,8 @@ from livekit.plugins import openai
 
 from backend.bus import redis_client
 from backend.config import settings
-from backend.voice import notifier
+from backend.memory import service as memory
+from backend.voice import notifier, tools
 from backend.voice.tools import cancel_task, confirm_execution, delegate_complex_task
 
 logger = logging.getLogger(__name__)
@@ -40,6 +41,29 @@ WELCOME_INSTRUCTIONS = (
     "Saluda brevemente al usuario y dile que estás listo para poner a tu equipo "
     "de subagentes a trabajar."
 )
+
+
+def build_welcome_instructions(memory_summary: str | None = None) -> str:
+    """Instrucciones de bienvenida; mencionan el contexto previo si existe memoria."""
+    if memory_summary:
+        return (
+            WELCOME_INSTRUCTIONS
+            + f" Menciona de forma natural que la última vez trabajó en: "
+            f"{memory_summary}."
+        )
+    return WELCOME_INSTRUCTIONS
+
+
+def _resolve_user_id(ctx: JobContext) -> str:
+    """Resuelve la identidad del usuario humano de la sala.
+
+    Prioridad: participante humano remoto > claims del token > ``anonymous``.
+    """
+    for participant in ctx.room.remote_participants.values():
+        if not getattr(participant, "is_agent", False):
+            return participant.identity
+    claims = ctx.token_claims() or {}
+    return claims.get("identity") or "anonymous"
 
 
 class OrchestratorAgent(Agent):
@@ -86,7 +110,18 @@ async def voice_entrypoint(ctx: JobContext) -> None:
     session = AgentSession()
     await session.start(room=ctx.room, agent=OrchestratorAgent())
     asyncio.create_task(_listen_for_updates(session))
-    await session.generate_reply(instructions=WELCOME_INSTRUCTIONS)
+
+    user_id = _resolve_user_id(ctx)
+    tools.USER_ID.set(user_id)
+    logger.info("Sesión de voz con identidad: %s", user_id)
+
+    memory_summary = None
+    if settings.memory_enabled:
+        memory_summary = await memory.load(user_id)
+    welcome = build_welcome_instructions(memory_summary)
+    await session.generate_reply(instructions=welcome)
+    if memory_summary:
+        await memory.publish_recalled(user_id, f"Memoria de {user_id}: {memory_summary}")
 
 
 if __name__ == "__main__":

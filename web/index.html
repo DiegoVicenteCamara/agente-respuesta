@@ -179,8 +179,16 @@
         try {
           connectBtn.disabled = true;
           setStatus("Conectando…", false);
-          const name = roomInput.value.trim() || "demo";
-          const res = await fetch("/token?room=" + encodeURIComponent(name));
+const name = roomInput.value.trim() || "demo";
+      // Identidad persistente del usuario para recuperar su memoria entre sesiones.
+      let identity = localStorage.getItem("respuesta-identity");
+      if (!identity) {
+        identity = "respuesta-user-" + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem("respuesta-identity", identity);
+      }
+      const res = await fetch(
+        "/token?room=" + encodeURIComponent(name) + "&identity=" + encodeURIComponent(identity)
+      );
           if (!res.ok) throw new Error("Error obteniendo token: " + (await res.text()));
           const { token, wsUrl } = await res.json();
           await room.connect(wsUrl, token);
