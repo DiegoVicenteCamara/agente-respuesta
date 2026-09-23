@@ -53,9 +53,13 @@ async def chat(text: str, system: str, model: str | None = None) -> str:
     from langchain_core.messages import HumanMessage, SystemMessage
 
     try:
-        resp = await llm.ainvoke(
-            [SystemMessage(content=system), HumanMessage(content=text)]
-        )
+        messages = [SystemMessage(content=system), HumanMessage(content=text)]
+        config = None
+        if settings.cost_tracking_enabled:
+            from backend.orchestrator import cost
+
+            config = {"callbacks": [cost.TokenUsageCallback(llm.model_name)]}
+        resp = await llm.ainvoke(messages, config=config) if config else await llm.ainvoke(messages)
         return str(resp.content).strip()
     except Exception as exc:  # noqa: BLE001
         logger.warning("LLM no disponible (%s); usando contenido bruto", exc)

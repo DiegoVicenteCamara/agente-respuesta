@@ -18,6 +18,7 @@ from celery import Celery
 from backend.config import settings
 from backend.decision import respond, router
 from backend.decision.schemas import RouteAction
+from backend.orchestrator import cost
 
 logger = logging.getLogger(__name__)
 
@@ -48,32 +49,41 @@ async def _publish(payload: dict) -> None:
 def _run_graph(task_id: str, goal: str, planner_model: str | None) -> str:
     from backend.orchestrator.graph import build_graph
 
-    graph = build_graph()
-    initial = {
-        "task_id": task_id,
-        "goal": goal,
-        "results": [],
-        "progress": [],
-        "planner_model": planner_model or "",
-    }
-    result = asyncio.run(graph.ainvoke(initial))
-    return result.get("analysis", "")
+    async def _inner() -> str:
+        model = planner_model or settings.openai_planner_model
+        async with cost.tracked():
+            graph = build_graph()
+            initial = {
+                "task_id": task_id,
+                "goal": goal,
+                "results": [],
+                "progress": [],
+                "planner_model": planner_model or "",
+            }
+            result = await graph.ainvoke(initial)
+            await cost.publish_cost_ready(task_id, model)
+            return result.get("analysis", "")
+
+    return asyncio.run(_inner())
 
 
 def _handle_fast(task_id: str, goal: str, model: str) -> str:
-    answer = asyncio.run(respond.quick_answer(goal, model=model))
-    asyncio.run(
-        _publish(
-            {
-                "task_id": task_id,
-                "type": "analysis_ready",
-                "agent": "jev-gate",
-                "message": answer,
-                "priority": "info",
-            }
-        )
-    )
-    return answer
+    async def _inner() -> str:
+        async with cost.tracked():
+            answer = await respond.quick_answer(goal, model=model)
+            await _publish(
+                {
+                    "task_id": task_id,
+                    "type": "analysis_ready",
+                    "agent": "jev-gate",
+                    "message": answer,
+                    "priority": "info",
+                }
+            )
+            await cost.publish_cost_ready(task_id, model)
+            return answer
+
+    return asyncio.run(_inner())
 
 
 def _handle_blocked(task_id: str) -> str:

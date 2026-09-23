@@ -16,6 +16,7 @@ from livekit.agents import RunContext, function_tool
 
 from backend.decision import respond, router
 from backend.decision.schemas import RouteAction
+from backend.orchestrator import cost
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,13 @@ def _session_key(ctx) -> str:
     return f"session-{id(ctx.session)}"
 
 
+async def _fast_answer(task_id: str, goal: str, model: str) -> str:
+    async with cost.tracked():
+        answer = await respond.quick_answer(goal, model=model)
+        await cost.publish_cost_ready(task_id, model)
+        return answer
+
+
 def _dispatch_orchestrator(task_id: str, goal: str) -> None:
     from backend.orchestrator.tasks import celery_app
 
@@ -57,7 +65,7 @@ async def delegate_complex_task_core(ctx, goal: str) -> str:
     task_id = str(uuid.uuid4())
     decision = await router.route(task_id, goal)
     if decision.action == RouteAction.FAST:
-        return await respond.quick_answer(goal, model=decision.model)
+        return await _fast_answer(task_id, goal, decision.model)
     if decision.action == RouteAction.BLOCK:
         return BLOCK_MESSAGE
     if decision.action == RouteAction.PROPOSE_COMMIT:
@@ -85,7 +93,7 @@ async def confirm_execution_core(ctx, confirm: bool) -> str:
     if decision.action == RouteAction.BLOCK:
         return BLOCK_MESSAGE
     if decision.action == RouteAction.FAST:
-        return await respond.quick_answer(goal, model=decision.model)
+        return await _fast_answer(task_id, goal, decision.model)
     try:
         _dispatch_orchestrator(task_id, goal)
     except Exception as exc:  # noqa: BLE001
