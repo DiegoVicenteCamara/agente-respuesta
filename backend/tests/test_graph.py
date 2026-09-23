@@ -57,8 +57,12 @@ async def test_pipeline_publishes_and_synthesizes(fake_redis, stub_nodes):
     assert channels == {"agent_updates"}
     payloads = [json.loads(m) for _, m in fake_redis.events]
     kinds = {p["type"] for p in payloads}
-    assert {"plan_ready", "subtask_done", "analysis_ready"} <= kinds
+    assert {"plan_ready", "subtask_started", "subtask_done", "analysis_ready"} <= kinds
     assert all(p["task_id"] == "t1" for p in payloads)
+    assert all(isinstance(p.get("ts"), int) for p in payloads)
+    for p in payloads:
+        if p["type"] in {"subtask_started", "subtask_done"}:
+            assert p["subtask"] in {"Subtarea A", "Subtarea B"}
 
 
 @pytest.mark.asyncio

@@ -6,6 +6,7 @@ con ``Send``) y consolida un informe final. Cada nodo publica eventos en Redis.
 
 import logging
 import operator
+import time
 from typing import Annotated, TypedDict
 
 from langgraph.graph import END, START, StateGraph
@@ -28,18 +29,25 @@ class ResearchState(TypedDict, total=False):
 
 
 async def _publish(
-    task_id: str, event_type: str, agent: str, message: str, priority: str = "info"
+    task_id: str,
+    event_type: str,
+    agent: str,
+    message: str,
+    priority: str = "info",
+    subtask: str | None = None,
 ) -> None:
     try:
-        await redis_client.publish_event(
-            {
-                "task_id": task_id,
-                "type": event_type,
-                "agent": agent,
-                "message": message,
-                "priority": priority,
-            }
-        )
+        payload = {
+            "task_id": task_id,
+            "type": event_type,
+            "agent": agent,
+            "message": message,
+            "priority": priority,
+            "ts": int(time.time() * 1000),
+        }
+        if subtask is not None:
+            payload["subtask"] = subtask
+        await redis_client.publish_event(payload)
     except ConnectionError:
         logger.warning("Redis no disponible; el evento «%s» no se notificó por voz", event_type)
     except Exception:  # noqa: BLE001
@@ -59,6 +67,14 @@ async def planner(state: ResearchState) -> dict:
 
 async def research(state: ResearchState) -> dict:
     subtask = state["subtask"]
+    await _publish(
+        state["task_id"],
+        "subtask_started",
+        "research",
+        f"El subagente de investigación ha empezado sobre «{subtask}».",
+        priority="silent",
+        subtask=subtask,
+    )
     snippets = await nodes.run_search(subtask)
     summary = await nodes.chat("\n".join(snippets), nodes.SUMMARY_SYSTEM_PROMPT)
     if not summary:
@@ -68,6 +84,7 @@ async def research(state: ResearchState) -> dict:
         "subtask_done",
         "research",
         f"El subagente de investigación ha terminado sobre «{subtask}».",
+        subtask=subtask,
     )
     return {
         "results": [{"subtask": subtask, "snippets": snippets, "summary": summary}],

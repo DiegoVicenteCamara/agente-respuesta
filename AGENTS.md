@@ -21,11 +21,25 @@ Map the user's intent to the matching skill automatically:
 - API or interface design → `api-and-interface-design`
 - UI work → `frontend-ui-engineering`
 - Closing a work period / weekly progress report / retrospective → `project-log`
+- Making, changing, or reversing a decision with trade-offs (architecture, workflow, UI, ops) → `decision-log` (ADR in `docs/decisions/`)
 
 The mapping is guidance, not exhaustive. If a task matches a skill that is not
 listed here, use it. Always look beyond the mapping: scan `.opencode/skills/`,
 `.agents/skills/`, and global skills locations, and match on each skill's
 `description` before deciding there is no applicable skill.
+
+## Documentación obligatoria (para siempre documentar las cosas)
+
+- Toda decisión con trade-offs que afecte trabajo futuro (arquitectura, flujo,
+  UI, operaciones) → crear un ADR numerado en `docs/decisions/ADR-NNN-*.md` con la
+  skill `decision-log` (CLI: `python .agents/skills/decision-log/scripts/decision_log.py new --title "..." --decisions-dir docs/decisions`).
+- El ADR debe acompañar el commit que implementa la decisión (documentar antes o
+  junto con el cambio, nunca después de olvidarse).
+- Un ADR obsoleto se marca `superseded by ADR-NNN`; nunca se elimina.
+- Al cerrar un periodo de trabajo → entrada semanal en `docs/project-log/YYYY-MM-DD.md`
+  (skill `project-log`).
+- La documentación resultante se entrega al usuario con la ruta del archivo para
+  su revisión.
 
 ## Execution Model
 
