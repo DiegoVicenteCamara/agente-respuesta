@@ -27,3 +27,11 @@ def test_missing_message_returns_none():
 def test_default_priority_is_info():
     assert notifier.classify({"message": "x"}) == "info"
     assert notifier.classify({"message": "x", "priority": "urgent"}) == "urgent"
+
+
+def test_task_cancelled_is_not_spoken():
+    # La tool cancel_task ya confirma por ctx.update: el evento solo va al panel.
+    out = notifier.build_spoken_update(
+        {"type": "task_cancelled", "message": "Tarea cancelada", "priority": "info"}
+    )
+    assert out is None

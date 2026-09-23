@@ -70,7 +70,7 @@ def test_fast_task_is_answered_without_building_graph(
 
     payloads = [json.loads(raw) for _, raw in fake_redis.events]
     kinds = {p["type"] for p in payloads}
-    assert kinds == {"analysis_ready"}
+    assert kinds == {"analysis_ready", "cost_ready"}
 
 
 def test_blocked_task_is_refused(

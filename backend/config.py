@@ -39,6 +39,24 @@ class Settings:
         )
         self.routing_confidence_min: float = float(_get("ROUTING_CONFIDENCE_MIN", "0.6"))
         self.routing_timeout_ms: int = int(_get("ROUTING_TIMEOUT_MS", "600"))
+        self.cost_tracking_enabled: bool = _get(
+            "COST_TRACKING_ENABLED", "true"
+        ).lower() != "false"
+        self.cost_eur_per_usd: float = float(_get("COST_EUR_PER_USD", "1.0"))
+        self.pricing_usd: dict[str, tuple[float, float]] = self._load_pricing()
+
+    def _load_pricing(self) -> dict[str, tuple[float, float]]:
+        defaults = {
+            "GPT_4O_MINI": (0.15, 0.60),
+            "GPT_4O": (2.50, 10.00),
+        }
+        return {
+            name: (
+                float(_get(f"PRICING_{name}_PER_1M_IN", str(price_in))),
+                float(_get(f"PRICING_{name}_PER_1M_OUT", str(price_out))),
+            )
+            for name, (price_in, price_out) in defaults.items()
+        }
 
 
 settings = Settings()
