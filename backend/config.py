@@ -47,6 +47,14 @@ class Settings:
         self.memory_enabled: bool = _get("MEMORY_ENABLED", "true").lower() != "false"
         self.memory_ttl_days: int = int(_get("MEMORY_TTL_DAYS", "30"))
         self.memory_max_chars: int = int(_get("MEMORY_MAX_CHARS", "2000"))
+        self.earcon_enabled: bool = _get("EARCON_ENABLED", "false").lower() not in (
+            "false",
+            "0",
+            "no",
+            "off",
+            "",
+        )
+        self.earcon_path: str = _get("EARCON_PATH", "")
 
     def _load_pricing(self) -> dict[str, tuple[float, float]]:
         defaults = {
