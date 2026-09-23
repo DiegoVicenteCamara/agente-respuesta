@@ -1,5 +1,6 @@
-"""Tests del ruteo en el tool de voz (delegación y confirmación)."""
+"""Tests del ruteo en el tool de voz (delegación, confirmación y cancelación)."""
 
+import json
 import uuid
 
 import pytest
@@ -28,8 +29,40 @@ class FakeCtx:
 @pytest.fixture
 def reset_pending():
     tools.PENDING.clear()
+    tools.ACTIVE_TASKS.clear()
     yield
     tools.PENDING.clear()
+    tools.ACTIVE_TASKS.clear()
+
+
+class _FakeRedis:
+    def __init__(self) -> None:
+        self.events: list[tuple[str, str]] = []
+
+    async def publish(self, channel: str, message: str) -> None:
+        self.events.append((channel, message))
+
+
+@pytest.fixture
+def fake_redis(monkeypatch):
+    fake = _FakeRedis()
+
+    async def fake_publish_event(payload: dict) -> None:
+        await fake.publish("agent_updates", json.dumps(payload, ensure_ascii=False))
+
+    monkeypatch.setattr("backend.bus.redis_client.publish_event", fake_publish_event)
+    return fake
+
+
+@pytest.fixture
+def revoke_spy(monkeypatch):
+    calls: list[str] = []
+
+    def fake_revoke(task_id: str) -> None:
+        calls.append(task_id)
+
+    monkeypatch.setattr(tools, "_revoke_task", fake_revoke)
+    return calls
 
 
 def _decision(action: RouteAction, model: str = FAST_MODEL, **kwargs) -> RouteDecision:
@@ -158,3 +191,114 @@ async def test_confirm_without_pending_returns_noop(reset_pending, patch_route, 
     text = await tools.confirm_execution_core(FakeCtx(), True)
     assert text == tools.NO_PENDING_MESSAGE
     assert recorded_dispatch == []
+
+
+@pytest.mark.asyncio
+async def test_delegate_orchestrator_registers_active_task(
+    reset_pending, patch_route, recorded_dispatch
+):
+    patch_route(_decision(RouteAction.ORCHESTRATOR, model=ADVANCED_MODEL))
+    ctx = FakeCtx()
+    await tools.delegate_complex_task_core(ctx, "Investiga el mercado")
+    active = tools.ACTIVE_TASKS[tools._session_key(ctx)]
+    task_id, goal = recorded_dispatch[0]
+    assert active == {"task_id": task_id, "goal": goal}
+
+
+@pytest.mark.asyncio
+async def test_delegate_with_active_task_revokes_previous(
+    reset_pending, patch_route, recorded_dispatch, revoke_spy
+):
+    patch_route(_decision(RouteAction.ORCHESTRATOR, model=ADVANCED_MODEL))
+    ctx = FakeCtx()
+    await tools.delegate_complex_task_core(ctx, "Primera tarea")
+    await tools.delegate_complex_task_core(ctx, "Segunda tarea")
+    first_task_id, _ = recorded_dispatch[0]
+    second_task_id, _ = recorded_dispatch[1]
+    assert revoke_spy == [first_task_id]
+    active = tools.ACTIVE_TASKS[tools._session_key(ctx)]
+    assert active["task_id"] == second_task_id
+
+
+@pytest.mark.asyncio
+async def test_confirm_registers_active_task(
+    reset_pending, patch_route, recorded_dispatch
+):
+    patch_route(_decision(RouteAction.PROPOSE_COMMIT, model=ADVANCED_MODEL))
+    ctx = FakeCtx()
+    await tools.delegate_complex_task_core(ctx, "Borra la cuenta")
+    patch_route(_decision(RouteAction.ORCHESTRATOR, model=ADVANCED_MODEL))
+    await tools.confirm_execution_core(ctx, True)
+    active = tools.ACTIVE_TASKS[tools._session_key(ctx)]
+    task_id, goal = recorded_dispatch[0]
+    assert active == {"task_id": task_id, "goal": goal}
+
+
+@pytest.mark.asyncio
+async def test_cancel_with_active_task_revokes_and_publishes(
+    reset_pending, fake_redis, revoke_spy
+):
+    ctx = FakeCtx()
+    tools.ACTIVE_TASKS[tools._session_key(ctx)] = {
+        "task_id": "task-123",
+        "goal": "Investiga el mercado",
+    }
+    text = await tools.cancel_task_core(ctx)
+    assert "Investiga el mercado" in text
+    assert revoke_spy == ["task-123"]
+    assert tools.ACTIVE_TASKS == {}
+    payloads = [json.loads(raw) for _, raw in fake_redis.events]
+    cancelled = [p for p in payloads if p["type"] == "task_cancelled"]
+    assert len(cancelled) == 1
+    event = cancelled[0]
+    assert event["task_id"] == "task-123"
+    assert event["priority"] == "info"
+    assert event["agent"] == "orchestrator"
+    assert "Investiga el mercado" in event["message"]
+    assert isinstance(event["ts"], int)
+
+
+@pytest.mark.asyncio
+async def test_cancel_without_active_task_is_polite_noop(
+    reset_pending, fake_redis, revoke_spy
+):
+    text = await tools.cancel_task_core(FakeCtx())
+    assert text == tools.NO_ACTIVE_TASK_MESSAGE
+    assert revoke_spy == []
+    assert fake_redis.events == []
+    assert tools.ACTIVE_TASKS == {}
+
+
+@pytest.mark.asyncio
+async def test_cancel_cleans_registry_even_if_revoke_fails(
+    reset_pending, fake_redis, monkeypatch
+):
+    def broken_revoke(task_id: str) -> None:
+        raise RuntimeError("broker caído")
+
+    monkeypatch.setattr(tools, "_revoke_task", broken_revoke)
+    ctx = FakeCtx()
+    tools.ACTIVE_TASKS[tools._session_key(ctx)] = {
+        "task_id": "task-123",
+        "goal": "Investiga el mercado",
+    }
+    text = await tools.cancel_task_core(ctx)
+    assert "Investiga el mercado" in text
+    assert tools.ACTIVE_TASKS == {}
+    payloads = [json.loads(raw) for _, raw in fake_redis.events]
+    assert any(p["type"] == "task_cancelled" for p in payloads)
+
+
+def test_dispatch_passes_task_id_to_celery(monkeypatch):
+    from backend.orchestrator import tasks
+
+    calls: list[dict] = []
+
+    def fake_send_task(name: str, args=None, task_id=None, **kwargs):
+        calls.append({"name": name, "args": args, "task_id": task_id})
+
+    monkeypatch.setattr(tasks.celery_app, "send_task", fake_send_task)
+    tools._dispatch_orchestrator("task-123", "Investiga el mercado")
+    assert calls == [
+        {"name": "run_pipeline", "args": ["task-123", "Investiga el mercado"], "task_id": "task-123"}
+    ]
