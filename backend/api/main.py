@@ -23,6 +23,50 @@ class RunGoal(BaseModel):
     goal: str
 
 
+class SipCallRequest(BaseModel):
+    phone_number: str
+    room: str = "demo"
+
+
+@app.get("/sip/status")
+async def sip_status() -> dict:
+    """Estado de la telefonía SIP (habilitada + trunk configurado)."""
+    from backend.voice import sip as sip_service
+
+    return {
+        "enabled": sip_service.sip_enabled(),
+        "number": settings.sip_number or None,
+    }
+
+
+@app.post("/sip/call")
+async def sip_call(body: SipCallRequest) -> dict:
+    """Marca al número del usuario vía ``CreateSIPParticipant`` (saliente)."""
+    from backend.voice import sip as sip_service
+
+    try:
+        phone = sip_service.normalize_phone(body.phone_number)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    room = body.room.strip()
+    if not room:
+        raise HTTPException(status_code=422, detail="La sala no puede estar vacía")
+    if not sip_service.sip_enabled():
+        raise HTTPException(
+            status_code=501,
+            detail="SIP no configurado: define SIP_ENABLED=true y SIP_TRUNK_ID en .env",
+        )
+    try:
+        result = await sip_service.place_outbound_call(phone, room)
+    except sip_service.SIPConfigError as exc:
+        raise HTTPException(status_code=501, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return result
+
+
 @app.get("/", include_in_schema=False)
 async def index() -> FileResponse:
     return FileResponse(WEB_DIR / "index.html")
