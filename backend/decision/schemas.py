@@ -72,6 +72,7 @@ class RouteDecision(BaseModel):
     confidence: float = 0.0
     latency_ms: int = 0
     fallback: bool = False
+    detail: str | None = None
 
 
 class RoutingConfig:
