@@ -3,6 +3,11 @@
 El worker ejecuta el grafo LangGraph en un bucle asyncio aislado; cada nodo
 publica eventos a Redis que el agente de voz consume para interrumpir
 proactivamente al usuario.
+
+Defensa en profundidad: al entrar, cada tarea vuelve a pasar por el triaje
+Sistema 1 (Jev). Si la tarea resultó trivial, se responde con el modelo
+económico sin construir el grafo; en caso contrario el planner usa el modelo
+seleccionado por la política (avanzado si el tier exige razonamiento).
 """
 
 import asyncio
@@ -11,6 +16,8 @@ import logging
 from celery import Celery
 
 from backend.config import settings
+from backend.decision import respond, router
+from backend.decision.schemas import RouteAction
 
 logger = logging.getLogger(__name__)
 
@@ -27,19 +34,78 @@ celery_app.conf.update(
 )
 
 
-def _run_graph(task_id: str, goal: str) -> str:
+async def _publish(payload: dict) -> None:
+    from backend.bus import redis_client
+
+    try:
+        await redis_client.publish_event(payload)
+    except ConnectionError:
+        logger.warning("Redis no disponible; el evento no se publicó")
+    except Exception:  # noqa: BLE001
+        logger.warning("No se pudo publicar el evento en Redis")
+
+
+def _run_graph(task_id: str, goal: str, planner_model: str | None) -> str:
     from backend.orchestrator.graph import build_graph
 
     graph = build_graph()
-    initial = {"task_id": task_id, "goal": goal, "results": [], "progress": []}
+    initial = {
+        "task_id": task_id,
+        "goal": goal,
+        "results": [],
+        "progress": [],
+        "planner_model": planner_model or "",
+    }
     result = asyncio.run(graph.ainvoke(initial))
     return result.get("analysis", "")
+
+
+def _handle_fast(task_id: str, goal: str, model: str) -> str:
+    answer = asyncio.run(respond.quick_answer(goal, model=model))
+    asyncio.run(
+        _publish(
+            {
+                "task_id": task_id,
+                "type": "analysis_ready",
+                "agent": "jev-gate",
+                "message": answer,
+                "priority": "info",
+            }
+        )
+    )
+    return answer
+
+
+def _handle_blocked(task_id: str) -> str:
+    message = (
+        "No puedo ejecutar esa solicitud: parece contener intentos de manipular "
+        "mis instrucciones. Reformúlala de otra forma por favor."
+    )
+    asyncio.run(
+        _publish(
+            {
+                "task_id": task_id,
+                "type": "blocked",
+                "agent": "jev-gate",
+                "message": message,
+                "priority": "info",
+            }
+        )
+    )
+    return ""
 
 
 @celery_app.task(name="run_pipeline")
 def run_pipeline(task_id: str, goal: str) -> str:
     try:
-        return _run_graph(task_id, goal)
+        decision = asyncio.run(router.route(task_id, goal))
+        if decision.action == RouteAction.FAST:
+            return _handle_fast(task_id, goal, decision.model)
+        if decision.action == RouteAction.BLOCK:
+            return _handle_blocked(task_id)
+        # PROPOSE_COMMIT llega aquí ya confirmado (voz) o directo (debug): se
+        # escala al orquestador con el modelo que fijó la política.
+        return _run_graph(task_id, goal, decision.model)
     except Exception as exc:  # noqa: BLE001
         logger.exception("Pipeline falló para task_id=%s", task_id)
         raise exc

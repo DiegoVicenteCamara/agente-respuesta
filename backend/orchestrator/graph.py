@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 class ResearchState(TypedDict, total=False):
     task_id: str
     goal: str
+    planner_model: str
     subtasks: list[str]
     results: Annotated[list[dict], operator.add]
     progress: Annotated[list[str], operator.add]
@@ -46,7 +47,7 @@ async def _publish(
 
 
 async def planner(state: ResearchState) -> dict:
-    subtasks = await nodes.plan_subtasks(state["goal"])
+    subtasks = await nodes.plan_subtasks(state["goal"], state.get("planner_model"))
     await _publish(
         state["task_id"],
         "plan_ready",
