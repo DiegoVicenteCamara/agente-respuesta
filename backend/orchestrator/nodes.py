@@ -35,19 +35,19 @@ FINAL_SYSTEM_PROMPT = (
 )
 
 
-def _build_llm() -> Any:
+def _build_llm(model: str | None = None) -> Any:
     if not settings.openai_api_key:
         return None
     from langchain_openai import ChatOpenAI
 
     return ChatOpenAI(
-        model=settings.openai_planner_model, temperature=0.2, max_retries=0
+        model=model or settings.openai_planner_model, temperature=0.2, max_retries=0
     )
 
 
-async def chat(text: str, system: str) -> str:
+async def chat(text: str, system: str, model: str | None = None) -> str:
     """Envía un mensaje a un LLM genérico; si no hay clave o falla, devuelve vacío."""
-    llm = _build_llm()
+    llm = _build_llm(model)
     if llm is None:
         return ""
     from langchain_core.messages import HumanMessage, SystemMessage
@@ -74,9 +74,11 @@ def _parse_subtasks(text: str, goal: str) -> list[str]:
     return [goal]
 
 
-async def plan_subtasks(goal: str) -> list[str]:
+async def plan_subtasks(goal: str, model: str | None = None) -> list[str]:
     plan = await chat(
-        PLAN_PROMPT + goal, "Eres un planificador de tareas de investigación."
+        PLAN_PROMPT + goal,
+        "Eres un planificador de tareas de investigación.",
+        model=model,
     )
     return _parse_subtasks(plan, goal)
 

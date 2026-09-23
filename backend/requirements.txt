@@ -5,6 +5,7 @@ livekit-api==1.2.1
 livekit-plugins-openai==1.8.2
 langgraph==1.2.12
 langchain-openai==1.6.2
+langchain-typesafe==0.0.1a3
 celery==5.6.3
 redis==8.1.0
 duckduckgo-search==8.1.1

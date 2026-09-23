@@ -18,7 +18,7 @@ from livekit.plugins import openai
 from backend.bus import redis_client
 from backend.config import settings
 from backend.voice import notifier
-from backend.voice.tools import delegate_complex_task
+from backend.voice.tools import confirm_execution, delegate_complex_task
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,8 @@ SYSTEM_PROMPT = (
     "resumir, comparar o analizar algo, usa la herramienta "
     "delegate_complex_task con el objetivo completo. Tras delegar, confirma "
     "brevemente y NO inventes resultados: espera los avisos que llegarán por voz. "
+    "Si pediste confirmación por una acción de riesgo y el usuario responde con su "
+    "decisión, llama a la herramienta confirm_execution con esa respuesta. "
     "El usuario puede interrumpirte en cualquier momento."
 )
 
@@ -47,7 +49,7 @@ class OrchestratorAgent(Agent):
                 voice=settings.openai_realtime_voice,
                 temperature=0.8,
             ),
-            tools=[delegate_complex_task],
+            tools=[delegate_complex_task, confirm_execution],
             allow_interruptions=True,
         )
 

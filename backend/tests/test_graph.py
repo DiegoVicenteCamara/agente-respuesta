@@ -26,7 +26,7 @@ def fake_redis(monkeypatch):
 
 @pytest.fixture
 def stub_nodes(monkeypatch):
-    async def fake_plan(goal: str) -> list[str]:
+    async def fake_plan(goal: str, model: str | None = None) -> list[str]:
         return ["Subtarea A", "Subtarea B"]
 
     async def fake_search(query: str, max_results: int = 5) -> list[str]:
@@ -65,7 +65,7 @@ async def test_pipeline_publishes_and_synthesizes(fake_redis, stub_nodes):
 async def test_plan_fallback_to_single_subtask(fake_redis, monkeypatch):
     from backend.orchestrator.graph import build_graph
 
-    async def fake_subtasks(goal: str) -> list[str]:
+    async def fake_subtasks(goal: str, model: str | None = None) -> list[str]:
         return [goal]
 
     monkeypatch.setattr(nodes, "plan_subtasks", fake_subtasks)
