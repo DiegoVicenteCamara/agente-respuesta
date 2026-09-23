@@ -63,7 +63,33 @@ async def debug_run(body: RunGoal) -> dict:
 
     task_id = f"web-{uuid.uuid4().hex[:8]}"
     await asyncio.to_thread(run_pipeline.delay, task_id=task_id, goal=goal)
+    # Registra la tarea en el historial (best-effort, no bloquea el 200).
+    try:
+        from backend.bus import redis_client
+
+        await asyncio.to_thread(redis_client.register_task, task_id, goal)
+    except Exception:  # noqa: BLE001
+        pass
     return {"task_id": task_id}
+
+
+@app.get("/tasks")
+async def list_tasks(limit: int = Query(50, ge=1, le=200)) -> list[dict]:
+    """Historial de tareas pasadas (degradación elegante: [] si Redis falla)."""
+    from backend.bus import redis_client
+
+    return await asyncio.to_thread(redis_client.list_tasks, limit)
+
+
+@app.get("/tasks/{task_id}")
+async def get_task(task_id: str) -> dict:
+    """Eventos ordenados de una tarea; 404 si no existe."""
+    from backend.bus import redis_client
+
+    events = await asyncio.to_thread(redis_client.get_task_events, task_id)
+    if events is None:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    return {"task_id": task_id, "events": events}
 
 
 @app.get("/debug/stream")

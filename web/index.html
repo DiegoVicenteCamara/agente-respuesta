@@ -91,6 +91,22 @@
     .graph-branch { fill:none; stroke:#a78bfa; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .graph-label { font:10px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill:#94a3b8; }
     .graph-goal { font:600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill:#cbd5e1; }
+    #history {
+      margin-top:8px; background:#0f172a; border:1px solid #334155; border-radius:8px;
+      padding:8px 12px; font-size:.85rem; max-height:180px; overflow:auto; flex-shrink:0;
+    }
+    #history::-webkit-scrollbar { width:8px; height:8px; }
+    #history::-webkit-scrollbar-thumb { background:#334155; border-radius:4px; }
+    .hist-item { border-bottom:1px solid #1e293b; padding:6px 0; }
+    .hist-item:last-child { border-bottom:0; }
+    .hist-head { display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; cursor:pointer; }
+    .hist-head .msg { color:#cbd5e1; word-break:break-word; }
+    .hist-meta { font-size:.72rem; color:#64748b; margin-left:4px; }
+    .hist-events { margin:6px 0 2px 8px; display:none; }
+    .hist-item.open .hist-events { display:block; }
+    .badge.done { background:#4ade80; }
+    .badge.running { background:#facc15; color:#451a03; }
+    .badge.blocked { background:#f87171; color:#450a0a; }
   </style>
 </head>
 <body>
@@ -126,6 +142,13 @@
           <p class="sub" style="margin:10px 0 0;">Aquí verás los avisos proactivos del orquestador (plan_ready → subtask_done → analysis_ready).</p>
         </div>
       </div>
+    </div>
+    <hr style="border:0;border-top:1px solid #334155;margin:14px 0 10px;" />
+    <h2 style="font-size:.95rem;margin:0 0 8px;"><span style="color:var(--accent)">Historial</span> · tareas pasadas
+      <button id="refreshHistory" style="background:#334155;color:var(--text);margin-left:8px;padding:6px 10px;font-size:.8rem;">Actualizar</button>
+    </h2>
+    <div id="history">
+      <p class="sub" style="margin:6px 0;">Sin historial todavía. Lanza una tarea en «Modo prueba».</p>
     </div>
   </main>
 
@@ -483,6 +506,7 @@
             if (ev.type === "analysis_ready" || ev.priority === "urgent") {
               es.close();
               runBtn.disabled = false;
+              loadHistory();
             }
           };
           es.onerror = () => {
@@ -506,6 +530,93 @@
           graphContainer.scrollLeft = graphContainer.scrollWidth;
         }
       }, 120);
+
+      // --- Historial de tareas pasadas (GET /tasks) --------------------
+      const historyEl = document.getElementById("history");
+      const refreshBtn = document.getElementById("refreshHistory");
+
+      function statusBadge(status) {
+        const s = String(status || "running").toLowerCase();
+        const cls = s === "done" ? "done" : s === "blocked" ? "blocked" : "running";
+        const label = s === "done" ? "HECHO" : s === "blocked" ? "BLOQUEADO" : "EN CURSO";
+        return { cls, label };
+      }
+
+      async function loadHistory() {
+        try {
+          const res = await fetch("/tasks");
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const tasks = await res.json();
+          historyEl.innerHTML = "";
+          if (!tasks.length) {
+            const p = document.createElement("p");
+            p.className = "sub";
+            p.style.margin = "6px 0";
+            p.textContent = "Sin historial todavía. Lanza una tarea en «Modo prueba».";
+            historyEl.append(p);
+            return;
+          }
+          for (const t of tasks) {
+            const item = document.createElement("div");
+            item.className = "hist-item";
+            const head = document.createElement("div");
+            head.className = "hist-head";
+            const b = statusBadge(t.status);
+            const badge = document.createElement("span");
+            badge.className = "badge " + b.cls;
+            badge.textContent = b.label;
+            const msg = document.createElement("span");
+            msg.className = "msg";
+            msg.textContent = (t.goal || t.task_id) + " · " + t.task_id;
+            const meta = document.createElement("span");
+            meta.className = "hist-meta";
+            meta.textContent = (t.last_event || "") + (t.ts ? " · " + new Date(t.ts).toLocaleString() : "");
+            head.append(badge, msg, meta);
+            const evBox = document.createElement("div");
+            evBox.className = "hist-events";
+            evBox.textContent = "Cargando…";
+            head.addEventListener("click", async () => {
+              item.classList.toggle("open");
+              if (item.classList.contains("open") && evBox.dataset.loaded !== "1") {
+                try {
+                  const r = await fetch("/tasks/" + encodeURIComponent(t.task_id));
+                  if (!r.ok) throw new Error("HTTP " + r.status);
+                  const body = await r.json();
+                  evBox.innerHTML = "";
+                  evBox.dataset.loaded = "1";
+                  for (const ev of body.events || []) {
+                    const line = document.createElement("div");
+                    line.className = "agent-line";
+                    const eb = document.createElement("span");
+                    eb.className = "badge " + (ev.agent || "planner");
+                    eb.textContent = String(ev.type || ev.agent || "evento");
+                    const em = document.createElement("span");
+                    em.className = "msg";
+                    em.textContent = String(ev.message || "");
+                    line.append(eb, em);
+                    evBox.append(line);
+                  }
+                  if (!evBox.children.length) evBox.textContent = "Sin eventos.";
+                } catch (err) {
+                  evBox.textContent = "No se pudo cargar el detalle.";
+                }
+              }
+            });
+            item.append(head, evBox);
+            historyEl.append(item);
+          }
+        } catch (err) {
+          historyEl.innerHTML = "";
+          const p = document.createElement("p");
+          p.className = "sub";
+          p.style.margin = "6px 0";
+          p.textContent = "Historial no disponible (Redis no accesible).";
+          historyEl.append(p);
+        }
+      }
+
+      if (refreshBtn) refreshBtn.addEventListener("click", loadHistory);
+      loadHistory();
     })();
   </script>
 </body>
