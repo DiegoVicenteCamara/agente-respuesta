@@ -8,11 +8,16 @@ This project uses skills installed under `.opencode/skills/` (or a compatible pa
 - Skills are located in `.opencode/skills/<skill-name>/SKILL.md` or `.agents/skills/<skill-name>/SKILL.md`.
 - Follow the skill workflow strictly; do not partially apply it.
 - Never skip required steps such as spec, plan, or test when a skill demands them.
+- **Antes de cualquier trabajo creativo** (crear features, componentes, añadir
+  funcionalidad o modificar comportamiento) invoca la skill `brainstorming`:
+  clasifica la idea (spike / bounded / architectural), presenta el diseño y la
+  aprobación humana es un HARD-GATE previo a implementar.
 
 ## Intent → Skill Mapping
 
 Map the user's intent to the matching skill automatically:
 
+- New ideas / features / functionality / creative work (before creating anything) → `brainstorming` (classify spike/bounded/architectural; human approval is a HARD-GATE), then `spec-driven-development` / `planning-and-task-breakdown` / `test-driven-development` according to the path
 - Feature / new functionality → `spec-driven-development`, then `incremental-implementation` and `test-driven-development`
 - Planning / breakdown → `planning-and-task-breakdown`
 - Bug / failure / unexpected behavior → `debugging-and-error-recovery`
