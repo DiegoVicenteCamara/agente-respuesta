@@ -412,5 +412,29 @@
     "seen": 1790176034.4790525,
     "ast_hash": "f90a68d8cab28f16f7a4697e100e3c29",
     "semantic_hash": ""
+  },
+  ".github/workflows/opencode-label.yml": {
+    "mtime": 1790177121.2875085,
+    "seen": 1790177208.444293,
+    "ast_hash": "077c25784da8941a27c7962ec98f0018",
+    "semantic_hash": ""
+  },
+  ".github/workflows/opencode-schedule.yml": {
+    "mtime": 1790177133.830058,
+    "seen": 1790177208.444293,
+    "ast_hash": "21bb548d17b0d7754d11b87d2538f3e9",
+    "semantic_hash": ""
+  },
+  ".github/workflows/test.yml": {
+    "mtime": 1790177109.7902713,
+    "seen": 1790177208.444293,
+    "ast_hash": "8eedb51b7c178affa3a4bef2b52797af",
+    "semantic_hash": ""
+  },
+  "docs/decisions/ADR-003-automatizacion-de-issues-con-opencode-github-agent.md": {
+    "mtime": 1790177176.797003,
+    "seen": 1790177208.444293,
+    "ast_hash": "7f25345c955fbcb61c4ed01b88b01802",
+    "semantic_hash": ""
   }
 }
