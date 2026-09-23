@@ -1,8 +1,9 @@
-"""Tests del cliente Jev: normalización, fallback HTTP y timeouts."""
+"""Tests del cliente Jev: normalización, fallback HTTP, timeouts y detalle del fracaso."""
 
 import pytest
 
 from backend.decision import jev
+from backend.decision.jev import ClassifyOutcome
 from backend.decision.schemas import (
     ComplexityTier,
     DecisionNormalizationError,
@@ -41,9 +42,12 @@ def test_normalize_invalid_choice_raises():
         jev._normalize(broken)
 
 
-async def test_classify_without_key_returns_none(monkeypatch):
+async def test_classify_without_key_reports_missing_key(monkeypatch):
     monkeypatch.setattr(jev.settings, "typesafe_api_key", "")
-    assert await jev.classify("Hola") is None
+    outcome = await jev.classify("Hola")
+    assert isinstance(outcome, ClassifyOutcome)
+    assert outcome.answer is None
+    assert "TYPESAFE_API_KEY" in outcome.detail
 
 
 async def test_classify_uses_http_fallback_when_lc_fails(monkeypatch):
@@ -57,12 +61,13 @@ async def test_classify_uses_http_fallback_when_lc_fails(monkeypatch):
 
     monkeypatch.setattr(jev, "_lc_classify", boom)
     monkeypatch.setattr(jev, "_http_classify", http_ok)
-    triage = await jev.classify("Pregunta sencilla")
-    assert triage is not None
-    assert triage.target_worker == TargetWorker.DIALOGUE
+    outcome = await jev.classify("Pregunta sencilla")
+    assert outcome.answer is not None
+    assert outcome.answer.target_worker == TargetWorker.DIALOGUE
+    assert outcome.detail is None
 
 
-async def test_classify_returns_none_when_all_transports_fail(monkeypatch):
+async def test_classify_reports_both_transports_failed(monkeypatch):
     monkeypatch.setattr(jev.settings, "typesafe_api_key", "sk-test")
 
     async def boom(*_args, **_kwargs):
@@ -70,7 +75,11 @@ async def test_classify_returns_none_when_all_transports_fail(monkeypatch):
 
     monkeypatch.setattr(jev, "_lc_classify", boom)
     monkeypatch.setattr(jev, "_http_classify", boom)
-    assert await jev.classify("X") is None
+    outcome = await jev.classify("X")
+    assert outcome.answer is None
+    assert "langchain_typesafe" in outcome.detail
+    assert "http" in outcome.detail
+    assert "fallo total" in outcome.detail
 
 
 async def test_classify_timeout_is_enforced(monkeypatch):
@@ -87,7 +96,8 @@ async def test_classify_timeout_is_enforced(monkeypatch):
     monkeypatch.setattr(jev, "_http_classify", slow)
 
     started = time.perf_counter()
-    result = await jev.classify("X")
+    outcome = await jev.classify("X")
     elapsed = time.perf_counter() - started
-    assert result is None
+    assert outcome.answer is None
+    assert "TimeoutError" in outcome.detail
     assert elapsed < 0.5

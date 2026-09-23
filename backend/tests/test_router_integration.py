@@ -5,6 +5,7 @@ import json
 import pytest
 
 from backend.decision import router
+from backend.decision.jev import ClassifyOutcome
 from backend.decision.schemas import (
     ComplexityTier,
     RouteAction,
@@ -46,9 +47,9 @@ def _triage(worker: str = "dialogue", tier: str = "low", risk: float = 0.1) -> T
     )
 
 
-async def _classify_returns(triage: TriageAnswer | None):
-    async def classify(_goal: str) -> TriageAnswer | None:
-        return triage
+async def _classify_returns(answer: TriageAnswer | None, detail: str | None = None):
+    async def classify(_goal: str) -> ClassifyOutcome:
+        return ClassifyOutcome(answer, detail)
 
     return classify
 
@@ -77,6 +78,7 @@ async def test_route_fast_publishes_silent_event(fake_redis):
     assert payload["worker"] == "dialogue"
     assert payload["tier"] == "low"
     assert payload["risk"] == 0.1
+    assert payload["detail"] is None
     assert "latency_ms" in payload
 
 
@@ -91,7 +93,7 @@ async def test_route_advanced_model_on_high_tier(fake_redis):
 
 
 async def test_route_fallback_when_classifier_unavailable(fake_redis):
-    async def classify_raises(_goal: str) -> TriageAnswer:
+    async def classify_raises(_goal: str) -> ClassifyOutcome:
         raise RuntimeError("Jev caído")
 
     decision = await router.route(
@@ -103,16 +105,20 @@ async def test_route_fallback_when_classifier_unavailable(fake_redis):
     assert decision.reason == "jev_unavailable"
     payloads = [json.loads(raw) for _, raw in fake_redis.events]
     assert all(p["fallback"] is True for p in payloads)
+    assert "Jev caído" in payloads[0]["detail"]
 
 
-async def test_route_none_triage_falls_back(fake_redis):
-    classify = await _classify_returns(None)
+async def test_route_none_triage_falls_back_with_detail(fake_redis):
+    classify = await _classify_returns(None, detail="clave no configurada")
     decision = await router.route(
         "t4", "X", classify=classify,
         fast_model=FAST_MODEL, advanced_model=ADVANCED_MODEL,
     )
     assert decision.action == RouteAction.ORCHESTRATOR
     assert decision.fallback is True
+    assert decision.detail == "clave no configurada"
+    payload = json.loads(fake_redis.events[0][1])
+    assert payload["detail"] == "clave no configurada"
 
 
 async def test_route_propagates_injection_to_block(fake_redis):
