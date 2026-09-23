@@ -1,10 +1,13 @@
 import json
+import logging
 from typing import Any
 
 from redis import Redis as SyncRedis
 from redis.asyncio import Redis as AsyncRedis
 
 from backend.config import settings
+
+logger = logging.getLogger(__name__)
 
 _async: AsyncRedis | None = None
 _sync: SyncRedis | None = None
@@ -42,3 +45,21 @@ async def publish_event(payload: dict[str, Any]) -> None:
             await client.aclose()
         except Exception:  # noqa: BLE001
             pass
+
+
+def mem_get(key: str) -> str | None:
+    """Lee un valor con TTL; tolerante a Redis caído (None + log)."""
+    try:
+        value = get_sync().get(key)
+    except Exception:  # noqa: BLE001
+        logger.warning("mem_get %s falló (Redis no accesible)", key)
+        return None
+    return str(value) if value is not None else None
+
+
+def mem_set(key: str, value: str, ttl_seconds: int) -> None:
+    """Escribe un valor con TTL; tolerante a Redis caído (no-op + log)."""
+    try:
+        get_sync().set(key, value, ex=ttl_seconds)
+    except Exception:  # noqa: BLE001
+        logger.warning("mem_set %s falló (Redis no accesible)", key)

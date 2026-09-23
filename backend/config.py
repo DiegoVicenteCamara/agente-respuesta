@@ -44,6 +44,9 @@ class Settings:
         ).lower() != "false"
         self.cost_eur_per_usd: float = float(_get("COST_EUR_PER_USD", "1.0"))
         self.pricing_usd: dict[str, tuple[float, float]] = self._load_pricing()
+        self.memory_enabled: bool = _get("MEMORY_ENABLED", "true").lower() != "false"
+        self.memory_ttl_days: int = int(_get("MEMORY_TTL_DAYS", "30"))
+        self.memory_max_chars: int = int(_get("MEMORY_MAX_CHARS", "2000"))
 
     def _load_pricing(self) -> dict[str, tuple[float, float]]:
         defaults = {
