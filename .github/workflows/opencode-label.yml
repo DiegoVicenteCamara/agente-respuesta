@@ -4,6 +4,10 @@ on:
   issues:
     types: [labeled]
 
+env:
+  OPENCODE_VERSION: v1.18.32
+  MODEL: opencode/gpt-6-sol
+
 jobs:
   opencode:
     if: startsWith(github.event.label.name, 'agent-ready')
@@ -34,14 +38,29 @@ jobs:
               owner, repo, issue_number: issue.number, labels: ['agent-in-progress']
             })
 
-      - name: Run OpenCode
-        uses: anomalyco/opencode/github@latest
+      - name: Cache opencode
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.opencode/bin
+          key: opencode-${{ runner.os }}-${{ runner.arch }}-${{ env.OPENCODE_VERSION }}
+
+      - name: Install opencode
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: curl -fsSL https://opencode.ai/install | bash -s -- --version ${{ env.OPENCODE_VERSION }}
+
+      - name: Add opencode to PATH
+        shell: bash
+        run: echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+
+      - name: Run opencode
+        shell: bash
+        run: opencode github run
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          model: opencode/gpt-6-sol
-          prompt: |
+          PROMPT: |
             Implement the GitHub issue in this repository.
 
             Follow AGENTS.md and its skills:
