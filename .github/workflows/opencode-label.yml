@@ -6,7 +6,7 @@ on:
 
 env:
   OPENCODE_VERSION: v1.18.32
-  MODEL: opencode/gpt-6-sol
+  MODEL: opencode/muse-spark-1.3-contributor-free
 
 jobs:
   opencode:
