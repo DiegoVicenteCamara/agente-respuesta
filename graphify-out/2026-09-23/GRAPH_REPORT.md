@@ -1,17 +1,17 @@
-# Graph Report - AgenteRespuesta  (2026-09-22)
+# Graph Report - AgenteRespuesta  (2026-09-23)
 
 ## Corpus Check
-- 40 files · ~17,565 words
+- 66 files · ~37,131 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 3 file(s) not represented in the graph (top: .example 1, (none) 1, .ini 1)
 
 ## Summary
-- 439 nodes · 620 edges · 35 communities (23 shown, 12 thin omitted)
-- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.85)
+- 861 nodes · 1575 edges · 54 communities (39 shown, 15 thin omitted)
+- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 165 edges (avg confidence: 0.91)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `4e3ad3a1`
+- Built from commit: `159fc1f7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -40,51 +40,70 @@
 - ADR-001: Grafo de organización tipo ramas GitHub con columnas reutilizables por tarea
 - create_decision
 - Bitácora — Semana del 2026-09-21 al 2026-09-27
+- RouteAction
+- test_tools_route.py
+- test_cost_tracking.py
+- tasks.py
+- server.cjs
+- Visual Companion Guide
+- startServer
+- handleRequest
+- Brainstorming Ideas Into Designs
+- ADR-002: Publicar causa de jev_unavailable en routing_decision (detalle)
+- helper.js
+- handleUpgrade
+- stop-server.sh
+- fake_redis
+- renderBranding
+- Plan: Jev System 1 dual-model router
+- start-server.sh
+- spec-document-reviewer-prompt.md
+- todo.md
 
 ## God Nodes (most connected - your core abstractions)
-1. `Decision Log` - 16 edges
-2. `parse_decision()` - 13 edges
-3. `ADR Format Guide` - 11 edges
-4. `Respuesta — Agente de voz con subagentes proactivos` - 11 edges
-5. `resolve_decisions_dir()` - 10 edges
-6. `load_decisions()` - 10 edges
-7. `build_parser()` - 10 edges
-8. `build_graph()` - 10 edges
-9. `create_decision()` - 9 edges
-10. `command_timeline()` - 9 edges
+1. `RouteAction` - 53 edges
+2. `decide()` - 24 edges
+3. `RouteDecision` - 22 edges
+4. `run_pipeline()` - 22 edges
+5. `route()` - 21 edges
+6. `TargetWorker` - 19 edges
+7. `delegate_complex_task_core()` - 19 edges
+8. `ComplexityTier` - 18 edges
+9. `TriageAnswer` - 18 edges
+10. `FakeCtx` - 17 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `get_token()` --references--> `_get()`  [EXTRACTED]
-  backend/api/main.py → backend/config.py
-- `test_silent_no_speech()` --calls--> `build_spoken_update()`  [EXTRACTED]
-  backend/tests/test_notifier.py → backend/voice/notifier.py
-- `test_info_builds_message()` --calls--> `build_spoken_update()`  [EXTRACTED]
-  backend/tests/test_notifier.py → backend/voice/notifier.py
-- `test_urgent_uses_attention_prefix()` --calls--> `build_spoken_update()`  [EXTRACTED]
-  backend/tests/test_notifier.py → backend/voice/notifier.py
-- `test_missing_message_returns_none()` --calls--> `build_spoken_update()`  [EXTRACTED]
-  backend/tests/test_notifier.py → backend/voice/notifier.py
+- `Option B: Triaje solo en el tool de voz `delegate_complex_task`` --references--> `delegate_complex_task()`  [INFERRED]
+  decisions/ADR-001-use-jev-system-1-triage-for-dual-model-routing.md → backend/voice/tools.py
+- `Option B: Campo `detail` en `RouteDecision`, propagado al evento y al panel` --references--> `ClassifyOutcome`  [INFERRED]
+  docs/decisions/ADR-002-publicar-causa-de-jev-unavailable-en-routing-decision-detalle.md → backend/decision/jev.py
+- `Tu tarea` --references--> `quick_answer()`  [INFERRED]
+  tasks/prompts/cost-tracking.md → backend/decision/respond.py
+- `Success Criteria` --references--> `route()`  [INFERRED]
+  SPEC-jev-router.md → backend/decision/router.py
+- `Option B: Campo `detail` en `RouteDecision`, propagado al evento y al panel` --references--> `RouteDecision`  [INFERRED]
+  docs/decisions/ADR-002-publicar-causa-de-jev-unavailable-en-routing-decision-detalle.md → backend/decision/schemas.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (35 total, 12 thin omitted)
+## Communities (54 total, 15 thin omitted)
 
 ### Community 0 - "decision_log.py"
 Cohesion: 0.15
 Nodes (19): main(), normalized_status(), parse_date(), parse_decision(), parse_next_review(), parse_status(), parse_supersedes_to(), parse_title() (+11 more)
 
 ### Community 1 - "graph.py"
-Cohesion: 0.06
-Nodes (44): asyncio, publish_event(), Any, backend_orchestrator, build_graph(), _fan_out(), planner(), _publish() (+36 more)
+Cohesion: 0.05
+Nodes (45): quick_answer(), Devuelve la respuesta del modelo económico a una tarea de complejidad baja., build_graph(), _fan_out(), planner(), _publish(), Grafo supervisor en LangGraph. Planifica el objetivo, lanza subagentes de…, research() (+37 more)
 
 ### Community 2 - "main.py"
 Cohesion: 0.06
-Nodes (34): backend_api, debug_run(), debug_stream(), get_token(), index(), API web: sirve la página del navegador y emite tokens JWT de LiveKit., Lanza una tarea de prueba a los subagentes (Celery) sin pasar por la voz., SSE: reenvía los eventos del bus de agentes al navegador. (+26 more)
+Nodes (37): asyncio, AsyncRedis, backend_api, debug_run(), debug_stream(), get_token(), index(), BaseModel (+29 more)
 
 ### Community 3 - "agent.py"
-Cohesion: 0.08
-Nodes (31): Agent, AgentSession, AsyncRedis, backend_bus, get_async(), test_default_priority_is_info(), test_info_builds_message(), test_missing_message_returns_none() (+23 more)
+Cohesion: 0.05
+Nodes (47): Agent, AgentSession, backend_bus, test_default_priority_is_info(), test_info_builds_message(), test_missing_message_returns_none(), test_silent_no_speech(), test_task_cancelled_is_not_spoken() (+39 more)
 
 ### Community 4 - "test_decision_log.py"
 Cohesion: 0.09
@@ -162,25 +181,89 @@ Nodes (9): create_decision(), DecisionLogError, Create a new sequential ADR file
 Cohesion: 0.29
 Nodes (6): Bitácora — Semana del 2026-09-21 al 2026-09-27, Bloqueos que continúan, Desvíos o Bloqueos, Lecciones aprendidas, Logros del periodo, Página de estado
 
+### Community 35 - "RouteAction"
+Cohesion: 0.06
+Nodes (84): backend_decision, Capa de filtrado, triaje y enrutamiento con Sistema 1 (Jev)., build_questions(), classify(), ClassifyOutcome, _get_classifier(), _http_classify(), _lc_classify() (+76 more)
+
+### Community 36 - "test_tools_route.py"
+Cohesion: 0.09
+Nodes (44): publish_event(), Any, _decision(), fake_redis(), FakeCtx, _FakeRedis, patch_quick_answer(), patch_route() (+36 more)
+
+### Community 37 - "test_cost_tracking.py"
+Cohesion: 0.07
+Nodes (41): CostTracker, current(), estimate_cost_eur(), _model_slug(), ModelUsage, publish_cost_ready(), Recolección ligera de tokens y coste estimado por tarea. Un ``CostTracker`` por…, Callback de LangChain que registra el uso de tokens en el tracker activo.… (+33 more)
+
+### Community 38 - "tasks.py"
+Cohesion: 0.06
+Nodes (39): Respuesta directa con el modelo económico para la ruta FAST (Tier Low)., backend_orchestrator, _handle_blocked(), _handle_fast(), _inner(), _publish(), Tareas Celery: ejecución duradera del pipeline multiagente. El worker ejecuta…, run_pipeline() (+31 more)
+
+### Community 39 - "server.cjs"
+Cohesion: 0.08
+Nodes (24): clients, CONTENT_DIR, crypto, debounceTimers, frameTemplate, fs, helperScript, http (+16 more)
+
+### Community 40 - "Visual Companion Guide"
+Cohesion: 0.10
+Nodes (19): Browser Events Format, Cards (visual designs), Cleaning Up, CSS Classes Available, Design Tips, File Naming, How It Works, Mock elements (wireframe building blocks) (+11 more)
+
+### Community 41 - "startServer"
+Cohesion: 0.16
+Nodes (12): browserLauncherForPlatform(), chmodOwnerOnly(), companionUrl(), generateToken(), initialToken(), maybeOpenBrowser(), preferredPort(), randomPort() (+4 more)
+
+### Community 42 - "handleRequest"
+Cohesion: 0.22
+Nodes (11): bootstrapPage(), getNewestScreen(), handleRequest(), isAuthorized(), isFullDocument(), isRegularFileInsideContentDir(), parseCookies(), pathnameOf() (+3 more)
+
+### Community 43 - "Brainstorming Ideas Into Designs"
+Cohesion: 0.18
+Nodes (10): After the Design (architectural path), Anti-Pattern: "Too Simple To Need Approval", Brainstorming Ideas Into Designs, Checklist, Establish Shared Understanding, Process Flow, Red Flags, The Process (+2 more)
+
+### Community 44 - "ADR-002: Publicar causa de jev_unavailable en routing_decision (detalle)"
+Cohesion: 0.18
+Nodes (10): ADR-002: Publicar causa de jev_unavailable en routing_decision (detalle), Consequences, Context, Date, Option A: Log en servidor, sin tocar el payload del evento, Option B: Campo `detail` en `RouteDecision`, propagado al evento y al panel, Option C: Endpoint de diagnóstico dedicado, Options Considered (+2 more)
+
+### Community 45 - "helper.js"
+Cohesion: 0.42
+Nodes (7): connect(), nextReconnectDelay(), reloadAfterRecovery(), sessionKey(), setStatus(), showTombstone(), websocketUrl()
+
+### Community 46 - "handleUpgrade"
+Cohesion: 0.25
+Nodes (8): broadcast(), computeAcceptKey(), decodeFrame(), encodeFrame(), handleMessage(), handleUpgrade(), isAllowedWebSocketOrigin(), touchActivity()
+
+### Community 47 - "stop-server.sh"
+Cohesion: 0.52
+Nodes (6): command_has_server_id(), command_line_for_pid(), is_brainstorm_server(), mark_stopped(), read_expected_server_id(), stop-server.sh script
+
+### Community 48 - "fake_redis"
+Cohesion: 0.33
+Nodes (3): fake_redis(), _FakeRedis, fixture
+
+### Community 49 - "renderBranding"
+Cohesion: 0.40
+Nodes (5): brandMarkup(), escapeHtmlText(), renderBranding(), waitingPage(), wrapInFrame()
+
+### Community 50 - "Plan: Jev System 1 dual-model router"
+Cohesion: 0.50
+Nodes (3): Plan: Jev System 1 dual-model router, Riesgos y mitigaciones, Verificación por capa
+
 ## Knowledge Gaps
-- **107 isolated node(s):** `$schema`, `plugins`, `Overview`, `Quick start`, `When to create an ADR` (+102 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 265 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **178 isolated node(s):** `crypto`, `http`, `fs`, `path`, `OPCODES` (+173 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 433 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **15 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **What connects `$schema`, `plugins`, `Overview` to the rest of the system?**
-  _107 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `decision_log.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.14736842105263157 - nodes in this community are weakly interconnected._
-- **Should `graph.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.05844155844155844 - nodes in this community are weakly interconnected._
-- **Should `main.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.06090808416389812 - nodes in this community are weakly interconnected._
-- **Should `agent.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.0761904761904762 - nodes in this community are weakly interconnected._
-- **Should `test_decision_log.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.08712121212121213 - nodes in this community are weakly interconnected._
-- **Should `review_checker.py` be split into smaller, more focused modules?**
-  _Cohesion score 0.1010752688172043 - nodes in this community are weakly interconnected._
+- **Why does `RouteAction` connect `RouteAction` to `test_tools_route.py`, `test_cost_tracking.py`, `tasks.py`?**
+  _High betweenness centrality (0.045) - this node is a cross-community bridge._
+- **Why does `run_pipeline()` connect `tasks.py` to `agent.py`, `graph.py`, `main.py`, `RouteAction`?**
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `RouteDecision` connect `RouteAction` to `test_tools_route.py`, `test_cost_tracking.py`, `tasks.py`, `ADR-002: Publicar causa de jev_unavailable en routing_decision (detalle)`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Are the 40 inferred relationships involving `RouteAction` (e.g. with `decide()` and `_decision()`) actually correct?**
+  _`RouteAction` has 40 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 8 inferred relationships involving `decide()` (e.g. with `ComplexityTier` and `RouteAction`) actually correct?**
+  _`decide()` has 8 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 8 inferred relationships involving `RouteDecision` (e.g. with `decide()` and `_publish_event()`) actually correct?**
+  _`RouteDecision` has 8 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 9 inferred relationships involving `run_pipeline()` (e.g. with `RouteAction` and `Consequences`) actually correct?**
+  _`run_pipeline()` has 9 INFERRED edges - model-reasoned connections that need verification._

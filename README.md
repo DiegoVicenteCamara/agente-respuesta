@@ -160,6 +160,26 @@ web/index.html             # Cliente del navegador (livekit-client)
   interrumpa…»* respetando el barge-in (`allow_interruptions=True`).
 - **`priority: urgent`** → *«Necesito tu atención…»*.
 
+## Implementación autónoma de issues (opencode en CI)
+
+Los issues del repo marcos con la label **`agent-ready`** son implementados de
+forma autónoma por un agente opencode y devueltos como un Pull Request listo
+para revisión. Ver `docs/decisions/ADR-003-...` para el diseño completo.
+
+- **`agent-ready`** → el workflow `opencode-label` se dispara y el agente
+  implementa el issue (rama `opencode/issue<N>-<ts>` + PR con `Closes #N`).
+- **Scheduler** (`opencode-schedule`, cada 6h) → procesa el issue `agent-ready`
+  más antiguo sin PR abierto, 1 por run.
+- **CI** (`test`) → corre `pytest` en cada PR y push a `main`; check obligatorio
+  de branch protection. El agente debe dejar la suite verde antes de abrir el PR.
+- Labels: `agent-ready` → `agent-in-progress` mientras trabaja; si falla, se
+  restaura `agent-ready`.
+
+Setup (una vez): instalar la GitHub App `opencode-agent` en el repo, crear el
+secret `OPENCODE_API_KEY` (suscripción opencode Zen/Go) y los labels
+`agent-ready` / `agent-in-progress`; activar branch protection en `main`
+(exigir PR, check `test` y 1 review).
+
 ## Siguiente paso natural
 
 Entrada por **teléfono real (SIP/PSTN)** con llamadas salientes
