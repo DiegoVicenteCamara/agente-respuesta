@@ -19,6 +19,7 @@ from backend.bus import redis_client
 from backend.config import settings
 from backend.memory import service as memory
 from backend.voice import notifier, tools
+from backend.voice.earcon import play_earcon
 from backend.voice.tools import cancel_task, confirm_execution, delegate_complex_task
 
 logger = logging.getLogger(__name__)
@@ -90,13 +91,18 @@ async def _listen_for_updates(session: AgentSession) -> None:
         if message.get("type") != "message":
             continue
         try:
-            text = notifier.build_spoken_update(json.loads(message["data"]))
+            payload = json.loads(message["data"])
         except (json.JSONDecodeError, TypeError):
+            continue
+        try:
+            text = notifier.build_spoken_update(payload)
+        except (TypeError, AttributeError):
             text = None
         if not text:
             continue
         logger.info("Notificación por voz: %s", text)
         try:
+            await play_earcon(session, payload)
             await session.generate_reply(instructions=text, allow_interruptions=True)
         except Exception:  # noqa: BLE001
             logger.exception("Fallo al inyectar la actualización por voz")
