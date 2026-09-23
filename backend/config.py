@@ -47,6 +47,7 @@ class Settings:
         self.memory_enabled: bool = _get("MEMORY_ENABLED", "true").lower() != "false"
         self.memory_ttl_days: int = int(_get("MEMORY_TTL_DAYS", "30"))
         self.memory_max_chars: int = int(_get("MEMORY_MAX_CHARS", "2000"))
+        self.cache_ttl_seconds: int = int(_get("CACHE_TTL_SECONDS", "86400"))
         self.earcon_enabled: bool = _get("EARCON_ENABLED", "false").lower() not in (
             "false",
             "0",
