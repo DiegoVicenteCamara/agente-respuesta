@@ -10,6 +10,7 @@ Cada delegación pasa primero por el triaje Sistema 1 (Jev):
 - ``cancel_task``: revoca por voz la tarea Celery activa de la sesión.
 """
 
+import contextvars
 import logging
 import time
 import uuid
@@ -22,6 +23,12 @@ from backend.decision.schemas import RouteAction
 from backend.orchestrator import cost
 
 logger = logging.getLogger(__name__)
+
+# Identidad del usuario de la llamada, resuelta por el entrypoint del agente de
+# voz. Se propaga a Celery para asociar las tareas con su memoria.
+USER_ID: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "user_id", default="anonymous"
+)
 
 BLOCK_MESSAGE = (
     "No puedo ejecutar esa solicitud: parece contener intentos de manipular mis "
@@ -60,11 +67,13 @@ async def _fast_answer(task_id: str, goal: str, model: str) -> str:
         return answer
 
 
-def _dispatch_orchestrator(task_id: str, goal: str) -> None:
+def _dispatch_orchestrator(task_id: str, goal: str, user_id: str) -> None:
     from backend.orchestrator.tasks import celery_app
 
-    celery_app.send_task("run_pipeline", args=[task_id, goal], task_id=task_id)
-    logger.info("Tarea delegada: task_id=%s goal=%r", task_id, goal)
+    celery_app.send_task(
+        "run_pipeline", args=[task_id, goal, user_id], task_id=task_id
+    )
+    logger.info("Tarea delegada: task_id=%s goal=%r user_id=%s", task_id, goal, user_id)
 
 
 def _revoke_task(task_id: str) -> None:
@@ -116,7 +125,7 @@ async def delegate_complex_task_core(ctx, goal: str) -> str:
         PENDING[_session_key(ctx)] = {"goal": goal}
         return PROPOSE_MESSAGE.format(goal=goal)
     try:
-        _dispatch_orchestrator(task_id, goal)
+        _dispatch_orchestrator(task_id, goal, USER_ID.get())
     except Exception as exc:  # noqa: BLE001
         logger.exception("No se pudo despachar la tarea a Celery")
         raise RuntimeError(f"No se pudo lanzar el equipo de subagentes: {exc}") from exc
@@ -140,7 +149,7 @@ async def confirm_execution_core(ctx, confirm: bool) -> str:
     if decision.action == RouteAction.FAST:
         return await _fast_answer(task_id, goal, decision.model)
     try:
-        _dispatch_orchestrator(task_id, goal)
+        _dispatch_orchestrator(task_id, goal, USER_ID.get())
     except Exception as exc:  # noqa: BLE001
         logger.exception("No se pudo despachar la tarea a Celery")
         raise RuntimeError(f"No se pudo lanzar el equipo de subagentes: {exc}") from exc

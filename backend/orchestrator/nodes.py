@@ -78,9 +78,14 @@ def _parse_subtasks(text: str, goal: str) -> list[str]:
     return [goal]
 
 
-async def plan_subtasks(goal: str, model: str | None = None) -> list[str]:
+async def plan_subtasks(
+    goal: str, model: str | None = None, memory: str | None = None
+) -> list[str]:
+    prompt = PLAN_PROMPT + goal
+    if memory:
+        prompt += f"\nContexto de conversaciones previas del usuario: {memory}"
     plan = await chat(
-        PLAN_PROMPT + goal,
+        prompt,
         "Eres un planificador de tareas de investigación.",
         model=model,
     )

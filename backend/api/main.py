@@ -38,7 +38,7 @@ async def get_token(
             status_code=500,
             detail="LIVEKIT_API_KEY / LIVEKIT_API_SECRET no configurados en .env",
         )
-    identity = identity or f"user-{uuid.uuid4().hex[:8]}"
+    identity = identity or f"participant-{uuid.uuid4().hex[:8]}"
     token = (
         AccessToken(settings.livekit_api_key, settings.livekit_api_secret)
         .with_identity(identity)
