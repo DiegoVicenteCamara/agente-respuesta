@@ -42,9 +42,9 @@
     "semantic_hash": ""
   },
   "backend/api/main.py": {
-    "mtime": 1790024611.8807564,
-    "seen": 1790111579.6445951,
-    "ast_hash": "d7e4b087f7ae8ccb6b29490d8bebc03a",
+    "mtime": 1790182887.2494621,
+    "seen": 1790183010.9055212,
+    "ast_hash": "87820521b9028c7e8e55b6f6a85bd55c",
     "semantic_hash": ""
   },
   "backend/bus/__init__.py": {
@@ -54,15 +54,15 @@
     "semantic_hash": ""
   },
   "backend/bus/redis_client.py": {
-    "mtime": 1790018281.4552586,
-    "seen": 1790111579.6445951,
-    "ast_hash": "2bff2803610e51fff4bde2970965b403",
+    "mtime": 1790180313.8307965,
+    "seen": 1790183010.9055212,
+    "ast_hash": "34ce35ce05ae193b81fa4193fa02f428",
     "semantic_hash": ""
   },
   "backend/config.py": {
-    "mtime": 1790175831.0816605,
-    "seen": 1790176034.4780145,
-    "ast_hash": "0526366c75e37900a010ef9738cc18ce",
+    "mtime": 1790180238.6654694,
+    "seen": 1790183010.9055212,
+    "ast_hash": "b6d529d4ad8446ff83e60549b5ba0f5a",
     "semantic_hash": ""
   },
   "backend/orchestrator/__init__.py": {
@@ -72,21 +72,21 @@
     "semantic_hash": ""
   },
   "backend/orchestrator/graph.py": {
-    "mtime": 1790175822.5868785,
-    "seen": 1790176034.4780145,
-    "ast_hash": "3e166b2d0f594730e2228080399d4407",
+    "mtime": 1790182941.3859706,
+    "seen": 1790183010.9055212,
+    "ast_hash": "2701f09c33933bfae0c1eb852b45201e",
     "semantic_hash": ""
   },
   "backend/orchestrator/nodes.py": {
-    "mtime": 1790175831.084174,
-    "seen": 1790176034.4780145,
-    "ast_hash": "e39f8c7c094857404b80227b0647219e",
+    "mtime": 1790182897.0415485,
+    "seen": 1790183010.9055212,
+    "ast_hash": "fee8009a9399c7ecc16ec0bc2ca3fbc1",
     "semantic_hash": ""
   },
   "backend/orchestrator/tasks.py": {
-    "mtime": 1790175831.084174,
-    "seen": 1790176034.4780145,
-    "ast_hash": "272174208469ecb5c24f035a75c3381f",
+    "mtime": 1790182894.912982,
+    "seen": 1790183010.9055212,
+    "ast_hash": "f6c5539cd7e08a862124955cb1b38c8c",
     "semantic_hash": ""
   },
   "backend/tests/__init__.py": {
@@ -96,21 +96,21 @@
     "semantic_hash": ""
   },
   "backend/tests/test_api.py": {
-    "mtime": 1790024648.3547206,
-    "seen": 1790111579.6445951,
-    "ast_hash": "f80f443b8319d857af6c5a6d871b7675",
+    "mtime": 1790182771.4458337,
+    "seen": 1790183010.9055212,
+    "ast_hash": "c3daf31c6b0514db8c1afac9ed7b35b7",
     "semantic_hash": ""
   },
   "backend/tests/test_graph.py": {
-    "mtime": 1790175822.5889037,
-    "seen": 1790176034.4780145,
-    "ast_hash": "b548c11093298b7a2d30de672a2df470",
+    "mtime": 1790182942.0375044,
+    "seen": 1790183010.9055212,
+    "ast_hash": "7c32838c15b3465a177af8653a7f583a",
     "semantic_hash": ""
   },
   "backend/tests/test_notifier.py": {
-    "mtime": 1790175894.3852463,
-    "seen": 1790176034.4780145,
-    "ast_hash": "3d1360375664da83bd8762fb1b2345e4",
+    "mtime": 1790177822.9291503,
+    "seen": 1790183010.9055212,
+    "ast_hash": "ec142ee7680860fd8d2f3535facae4c8",
     "semantic_hash": ""
   },
   "backend/voice/__init__.py": {
@@ -120,21 +120,21 @@
     "semantic_hash": ""
   },
   "backend/voice/agent.py": {
-    "mtime": 1790175942.8504636,
-    "seen": 1790176034.4780145,
-    "ast_hash": "bb8f0f0272838dbe4d1a40eb9949fa69",
+    "mtime": 1790182883.908607,
+    "seen": 1790183010.9055212,
+    "ast_hash": "50ebbc4968d4ccc8c25864d6a0a5ec93",
     "semantic_hash": ""
   },
   "backend/voice/notifier.py": {
-    "mtime": 1790175926.9624362,
-    "seen": 1790176034.4780145,
-    "ast_hash": "ef493b11408dd13a40876c93ced9a172",
+    "mtime": 1790177822.931512,
+    "seen": 1790183010.9055212,
+    "ast_hash": "e1826bf3b0579a21a2e9cfd84fc3ae01",
     "semantic_hash": ""
   },
   "backend/voice/tools.py": {
-    "mtime": 1790175925.9787827,
-    "seen": 1790176034.4780145,
-    "ast_hash": "bde9ac89cb4b00dc0cfb77090cc7beaa",
+    "mtime": 1790182860.2415674,
+    "seen": 1790183010.9055212,
+    "ast_hash": "f4c2f58a5cfeabd13b77b4d76d817ca1",
     "semantic_hash": ""
   },
   "skills-lock.json": {
@@ -222,9 +222,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1790025404.0818017,
-    "seen": 1790111579.6445951,
-    "ast_hash": "ac2557adf62cff3a812d922bed735c89",
+    "mtime": 1790177822.9261508,
+    "seen": 1790183010.9055212,
+    "ast_hash": "c33140374709f60680105181feb055f9",
     "semantic_hash": ""
   },
   "backend/requirements.txt": {
@@ -234,9 +234,9 @@
     "semantic_hash": ""
   },
   "web/index.html": {
-    "mtime": 1790175831.0871756,
-    "seen": 1790176034.4790525,
-    "ast_hash": "413104b01e6d5cbf43d4902f22fef2ea",
+    "mtime": 1790182888.7213347,
+    "seen": 1790183010.9055212,
+    "ast_hash": "1ed210e678f46227554f31c67c4a5c58",
     "semantic_hash": ""
   },
   "docs/decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md": {
@@ -276,14 +276,14 @@
     "semantic_hash": ""
   },
   "backend/decision/__init__.py": {
-    "mtime": 1790175831.0826652,
-    "seen": 1790176034.4780145,
+    "mtime": 1790177822.9261508,
+    "seen": 1790183010.9055212,
     "ast_hash": "44defb2ee936eb81389c09513286dbc4",
     "semantic_hash": ""
   },
   "backend/decision/jev.py": {
-    "mtime": 1790175831.0831692,
-    "seen": 1790176034.4780145,
+    "mtime": 1790177822.9271512,
+    "seen": 1790183010.9055212,
     "ast_hash": "4d68c89f59652853da720795c6f4c8bd",
     "semantic_hash": ""
   },
@@ -294,26 +294,26 @@
     "semantic_hash": ""
   },
   "backend/decision/router.py": {
-    "mtime": 1790175831.0831692,
-    "seen": 1790176034.4780145,
+    "mtime": 1790177822.9271512,
+    "seen": 1790183010.9055212,
     "ast_hash": "9a51150af2b00f31d72a6319e9128a47",
     "semantic_hash": ""
   },
   "backend/decision/schemas.py": {
-    "mtime": 1790175831.0831692,
-    "seen": 1790176034.4780145,
+    "mtime": 1790177822.9271512,
+    "seen": 1790183010.9055212,
     "ast_hash": "e9b93ad6a20ad3e3e0972c9e54ef590b",
     "semantic_hash": ""
   },
   "backend/orchestrator/cost.py": {
-    "mtime": 1790175831.084174,
-    "seen": 1790176034.4780145,
+    "mtime": 1790177822.9281516,
+    "seen": 1790183010.9055212,
     "ast_hash": "85c7e7eb710cc868f94f448ab8639af3",
     "semantic_hash": ""
   },
   "backend/tests/test_cost_tracking.py": {
-    "mtime": 1790175831.085176,
-    "seen": 1790176034.4780145,
+    "mtime": 1790177822.9291503,
+    "seen": 1790183010.9055212,
     "ast_hash": "6bd927f208b462f77473e1f6cc64e6bd",
     "semantic_hash": ""
   },
@@ -324,27 +324,27 @@
     "semantic_hash": ""
   },
   "backend/tests/test_jev_client.py": {
-    "mtime": 1790175831.085176,
-    "seen": 1790176034.4780145,
+    "mtime": 1790177822.9291503,
+    "seen": 1790183010.9055212,
     "ast_hash": "0283b2d2c8e930ce7dc8b92aa3310457",
     "semantic_hash": ""
   },
   "backend/tests/test_router_integration.py": {
-    "mtime": 1790175831.0861745,
-    "seen": 1790176034.4780145,
+    "mtime": 1790177822.930514,
+    "seen": 1790183010.9055212,
     "ast_hash": "f1403bd8a5a16263ba1cf7fe2ac782e9",
     "semantic_hash": ""
   },
   "backend/tests/test_tasks_route.py": {
-    "mtime": 1790175831.0861745,
-    "seen": 1790176034.4780145,
-    "ast_hash": "c100e0aa53ad44d61d8f78abaf6c427d",
+    "mtime": 1790182779.9172246,
+    "seen": 1790183010.9055212,
+    "ast_hash": "da3ca6d7b8be895feaf1632f6f5352db",
     "semantic_hash": ""
   },
   "backend/tests/test_tools_route.py": {
-    "mtime": 1790175893.706231,
-    "seen": 1790176034.4780145,
-    "ast_hash": "0a6482bee440da840db5cd926eea7a31",
+    "mtime": 1790182820.3761637,
+    "seen": 1790183010.9055212,
+    "ast_hash": "826b4e455533eec641d5f73d871b6f6b",
     "semantic_hash": ""
   },
   ".agents/skills/brainstorming/SKILL.md": {
@@ -384,57 +384,99 @@
     "semantic_hash": ""
   },
   "docs/decisions/ADR-002-publicar-causa-de-jev-unavailable-en-routing-decision-detalle.md": {
-    "mtime": 1790175831.0871756,
-    "seen": 1790176034.4790525,
+    "mtime": 1790177822.9326699,
+    "seen": 1790183010.9055212,
     "ast_hash": "4d491a39a8076925a3bd057fd2c57463",
     "semantic_hash": ""
   },
   "tasks/plan.md": {
-    "mtime": 1790175822.746282,
-    "seen": 1790176034.4790525,
-    "ast_hash": "4b68bd0f2db7f2d0cdb3fdaa685e3739",
+    "mtime": 1790180159.514406,
+    "seen": 1790183010.9055212,
+    "ast_hash": "465cdff868ec2568648bae1064ee2f86",
     "semantic_hash": ""
   },
   "tasks/prompts/cancel-task-by-voice.md": {
-    "mtime": 1790175823.4377055,
-    "seen": 1790176034.4790525,
+    "mtime": 1790177822.968395,
+    "seen": 1790183010.9055212,
     "ast_hash": "05a28ad593000e8a84b28760aff2cbc4",
     "semantic_hash": ""
   },
   "tasks/prompts/cost-tracking.md": {
-    "mtime": 1790175831.0871756,
-    "seen": 1790176034.4790525,
+    "mtime": 1790177822.968395,
+    "seen": 1790183010.9055212,
     "ast_hash": "39c8d43e4fbb874ee922bc8f1cc5a4b9",
     "semantic_hash": ""
   },
   "tasks/todo.md": {
-    "mtime": 1790175822.7472806,
-    "seen": 1790176034.4790525,
-    "ast_hash": "f90a68d8cab28f16f7a4697e100e3c29",
+    "mtime": 1790182999.9712067,
+    "seen": 1790183010.9055212,
+    "ast_hash": "207dbbe719144074e1997b0e5e859a22",
     "semantic_hash": ""
   },
   ".github/workflows/opencode-label.yml": {
-    "mtime": 1790177121.2875085,
-    "seen": 1790177208.444293,
-    "ast_hash": "077c25784da8941a27c7962ec98f0018",
+    "mtime": 1790182158.4923425,
+    "seen": 1790183010.9055212,
+    "ast_hash": "c7aeac6f533dfaebb2433cd2e76db90c",
     "semantic_hash": ""
   },
   ".github/workflows/opencode-schedule.yml": {
-    "mtime": 1790177133.830058,
-    "seen": 1790177208.444293,
-    "ast_hash": "21bb548d17b0d7754d11b87d2538f3e9",
+    "mtime": 1790182158.4923425,
+    "seen": 1790183010.9055212,
+    "ast_hash": "2c2daf5b7a1222ad28cc0e52018b53dd",
     "semantic_hash": ""
   },
   ".github/workflows/test.yml": {
-    "mtime": 1790177109.7902713,
-    "seen": 1790177208.444293,
-    "ast_hash": "8eedb51b7c178affa3a4bef2b52797af",
+    "mtime": 1790177822.925151,
+    "seen": 1790183010.9055212,
+    "ast_hash": "076449a7145315974067ae975060bad0",
     "semantic_hash": ""
   },
   "docs/decisions/ADR-003-automatizacion-de-issues-con-opencode-github-agent.md": {
-    "mtime": 1790177176.797003,
-    "seen": 1790177208.444293,
-    "ast_hash": "7f25345c955fbcb61c4ed01b88b01802",
+    "mtime": 1790177822.9326699,
+    "seen": 1790183010.9055212,
+    "ast_hash": "a42c6adad42af05bcab8b049690a2627",
+    "semantic_hash": ""
+  },
+  "backend/memory/__init__.py": {
+    "mtime": 1790180323.7274292,
+    "seen": 1790183010.9055212,
+    "ast_hash": "892f6a70d490e82a95346401a8ffd55f",
+    "semantic_hash": ""
+  },
+  "backend/memory/service.py": {
+    "mtime": 1790180323.0485642,
+    "seen": 1790183010.9055212,
+    "ast_hash": "85b411e3fa1584f407c78d20d3773649",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_memory_service.py": {
+    "mtime": 1790180354.3624723,
+    "seen": 1790183010.9055212,
+    "ast_hash": "eb16394162739169581b953bd5f0dfad",
+    "semantic_hash": ""
+  },
+  "backend/tests/test_memory_voice.py": {
+    "mtime": 1790182799.5632174,
+    "seen": 1790183010.9055212,
+    "ast_hash": "0a11da5b94354d7d4834dd4d95cb1452",
+    "semantic_hash": ""
+  },
+  "docs/decisions/ADR-004-memoria-persistente-de-conversaciones-por-usuario-en-redis.md": {
+    "mtime": 1790182990.9324746,
+    "seen": 1790183010.9055212,
+    "ast_hash": "80cfbc1517db1f0160a53bba453233f6",
+    "semantic_hash": ""
+  },
+  "docs/superpowers/specs/2026-09-23-conversation-memory-design.md": {
+    "mtime": 1790177872.8660035,
+    "seen": 1790183010.9055212,
+    "ast_hash": "72058f6598ed6edeca7dc58dfe247981",
+    "semantic_hash": ""
+  },
+  "tasks/prompts/conversation-memory.md": {
+    "mtime": 1790177822.6438937,
+    "seen": 1790183010.9055212,
+    "ast_hash": "7d83298967b979e38020022264fa5d35",
     "semantic_hash": ""
   }
 }
