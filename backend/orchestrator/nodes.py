@@ -5,12 +5,14 @@ voz traduce en interrupciones proactivas habladas.
 """
 
 import asyncio
+import hashlib
 import json
 import logging
 from typing import Any
 
 import httpx
 
+from backend.bus import redis_client
 from backend.config import settings
 
 logger = logging.getLogger(__name__)
@@ -78,6 +80,12 @@ def _parse_subtasks(text: str, goal: str) -> list[str]:
     return [goal]
 
 
+def _research_hash(query: str) -> str:
+    """Hash SHA-256 de la query normalizada (lowercase + strip)."""
+    normalized = (query or "").strip().lower()
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
 async def plan_subtasks(
     goal: str, model: str | None = None, memory: str | None = None
 ) -> list[str]:
@@ -93,7 +101,31 @@ async def plan_subtasks(
 
 
 async def run_search(query: str, max_results: int = 5) -> list[str]:
-    """Búsqueda web con Tavily si hay clave; si no, DuckDuckGo."""
+    """Búsqueda web con Tavily si hay clave; si no, DuckDuckGo.
+
+    Usa caché Redis por consulta normalizada (lowercase + strip) con TTL
+    ``CACHE_TTL_SECONDS``. Un hit evita llamar al proveedor; Redis caído
+    degrada a llamada directa.
+    """
+    cache_hash = _research_hash(query)
+    try:
+        cached = redis_client.research_cache_get(cache_hash)
+    except Exception:  # noqa: BLE001
+        logger.warning("Caché de investigación no disponible; llamada directa")
+        cached = None
+    if cached is not None:
+        return cached
+    results = await _fetch_search(query, max_results)
+    try:
+        redis_client.research_cache_set(
+            cache_hash, results, ttl=settings.cache_ttl_seconds
+        )
+    except Exception:  # noqa: BLE001
+        logger.warning("No se pudo guardar la caché de investigación")
+    return results
+
+
+async def _fetch_search(query: str, max_results: int) -> list[str]:
     if settings.tavily_api_key:
         try:
             async with httpx.AsyncClient(timeout=30) as client:
