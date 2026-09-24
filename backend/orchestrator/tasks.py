@@ -70,13 +70,14 @@ def _handle_fast(task_id: str, goal: str, model: str) -> str:
                 "agent": "jev-gate",
                 "message": answer,
                 "priority": "info",
+                "goal": goal,
             }
         )
     )
     return answer
 
 
-def _handle_blocked(task_id: str) -> str:
+def _handle_blocked(task_id: str, goal: str) -> str:
     message = (
         "No puedo ejecutar esa solicitud: parece contener intentos de manipular "
         "mis instrucciones. Reformúlala de otra forma por favor."
@@ -89,6 +90,7 @@ def _handle_blocked(task_id: str) -> str:
                 "agent": "jev-gate",
                 "message": message,
                 "priority": "info",
+                "goal": goal,
             }
         )
     )
@@ -102,7 +104,7 @@ def run_pipeline(task_id: str, goal: str) -> str:
         if decision.action == RouteAction.FAST:
             return _handle_fast(task_id, goal, decision.model)
         if decision.action == RouteAction.BLOCK:
-            return _handle_blocked(task_id)
+            return _handle_blocked(task_id, goal)
         # PROPOSE_COMMIT llega aquí ya confirmado (voz) o directo (debug): se
         # escala al orquestador con el modelo que fijó la política.
         return _run_graph(task_id, goal, decision.model)

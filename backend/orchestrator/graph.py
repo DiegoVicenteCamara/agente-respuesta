@@ -35,6 +35,7 @@ async def _publish(
     message: str,
     priority: str = "info",
     subtask: str | None = None,
+    goal: str | None = None,
 ) -> None:
     try:
         payload = {
@@ -47,6 +48,8 @@ async def _publish(
         }
         if subtask is not None:
             payload["subtask"] = subtask
+        if goal is not None:
+            payload["goal"] = goal
         await redis_client.publish_event(payload)
     except ConnectionError:
         logger.warning("Redis no disponible; el evento «%s» no se notificó por voz", event_type)
@@ -61,6 +64,7 @@ async def planner(state: ResearchState) -> dict:
         "plan_ready",
         "planner",
         f"He descompuesto la tarea en {len(subtasks)} frentes de investigación.",
+        goal=state["goal"],
     )
     return {"subtasks": subtasks}
 
