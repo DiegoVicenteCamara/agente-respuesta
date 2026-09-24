@@ -107,7 +107,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ needs.guard.outputs.pr_number }}
         with:
-          model: opencode/gpt-6-sol
+          model: opencode/big-pickle
           prompt: |
             You are the autonomous PR reviewer and merges PRs when the project's
             Definition of Done (DoD) is met. Read docs/definition-of-done.md first
