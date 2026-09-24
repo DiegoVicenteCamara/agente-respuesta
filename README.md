@@ -164,7 +164,8 @@ web/index.html             # Cliente del navegador (livekit-client)
 
 Los issues del repo marcos con la label **`agent-ready`** son implementados de
 forma autónoma por un agente opencode y devueltos como un Pull Request listo
-para revisión. Ver `docs/decisions/ADR-003-...` para el diseño completo.
+para revisión. Ver `docs/decisions/ADR-003-...` y
+`docs/decisions/ADR-004-...` para el diseño completo.
 
 - **`agent-ready`** → el workflow `opencode-label` se dispara y el agente
   implementa el issue (rama `opencode/issue<N>-<ts>` + PR con `Closes #N`).
@@ -172,13 +173,18 @@ para revisión. Ver `docs/decisions/ADR-003-...` para el diseño completo.
   más antiguo sin PR abierto, 1 por run.
 - **CI** (`test`) → corre `pytest` en cada PR y push a `main`; check obligatorio
   de branch protection. El agente debe dejar la suite verde antes de abrir el PR.
+- **Revisión y merge automático** (`opencode-review`) → un agente revisor
+  comprueba la Definición de Hecho del proyecto (`docs/definition-of-done.md`),
+  trae `main` sobre la rama resolviendo conflictos en verde y, si todo cumple,
+  mergea la PR automáticamente. Si algo no cumple, comenta en la PR qué falla y
+  qué soluciones y deja la PR abierta sin mergear.
 - Labels: `agent-ready` → `agent-in-progress` mientras trabaja; si falla, se
   restaura `agent-ready`.
 
 Setup (una vez): instalar la GitHub App `opencode-agent` en el repo, crear el
 secret `OPENCODE_API_KEY` (suscripción opencode Zen/Go) y los labels
 `agent-ready` / `agent-in-progress`; activar branch protection en `main`
-(exigir PR, check `test` y 1 review).
+(exigir PR y check `test`; el review lo realiza el agente revisor).
 
 ## Siguiente paso natural
 

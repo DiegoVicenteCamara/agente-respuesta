@@ -4,7 +4,7 @@
   "2": "main.py",
   "3": "agent.py",
   "4": "test_decision_log.py",
-  "5": "review_checker.py",
+  "5": "due_accepted_decisions",
   "6": "Decision Log",
   "7": "Bitácora de Avances y Retrospectivas (project-log)",
   "8": "Spec-Driven Development",
@@ -54,11 +54,13 @@
   "52": "spec-document-reviewer-prompt.md",
   "53": "todo.md",
   "54": "test_graph.py",
-  "55": "Definición de Hecho (DoD)",
+  "55": "review_checker.py",
   "56": "ADR-003: Automatización de issues con opencode GitHub agent",
   "57": "nodes.py",
-  "59": "config.py",
+  "58": "_get",
+  "59": "test_api.py",
   "60": "tasks.py",
-  "61": "quick_answer",
-  "62": "redis_client.py"
+  "61": "chat",
+  "62": "redis_client.py",
+  "63": "main"
 }

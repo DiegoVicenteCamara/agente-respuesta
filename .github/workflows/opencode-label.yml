@@ -72,10 +72,17 @@ jobs:
               and do not finish until the whole suite is green.
             - Follow the repo's style, update the graphify knowledge graph if code
               files changed, and write tests for the new behavior.
+            - Before finishing, read docs/definition-of-done.md and post a comment
+              on the issue with the structured evidence checklist it defines
+              ("## Evidencias DoD"): what was done, commits, PR number, validation
+              result, and documentation updated (or "no aplica"). Every box of the
+              checklist must be checked with real links, because the autonomous
+              reviewer will only merge the PR when the DoD is met.
 
             Use `gh` to manage labels and comments when appropriate (for example,
-            to respond on the issue or mark blockers). PR creation and the `Closes #N`
-            line are handled automatically after your response.
+            to respond on the issue, mark blockers, or post the DoD evidence).
+            PR creation and the `Closes #N` line are handled automatically after
+            your response.
 
       - name: Restore agent-ready on failure
         if: failure()
