@@ -91,6 +91,19 @@
     .graph-branch { fill:none; stroke:#a78bfa; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
     .graph-label { font:10px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill:#94a3b8; }
     .graph-goal { font:600 11px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; fill:#cbd5e1; }
+    .badge.jev-gate { background:#fbbf24; color:#451a03; }
+    .badge.cost { background:#f472b6; color:#500724; }
+    #history {
+      margin-top:12px; flex-shrink:0; max-height:30vh; overflow:auto;
+      border-top:1px solid #334155; padding-top:10px;
+    }
+    .history-item { margin:6px 0; display:flex; gap:8px; align-items:baseline; cursor:pointer; }
+    .history-item:hover .msg { color:#22d3ee; }
+    .history-item .msg { flex:1; }
+    .history-events {
+      margin:4px 0 8px 5px; padding-left:10px; border-left:2px solid #334155;
+      font-size:.8rem; display:flex; flex-direction:column;
+    }
   </style>
 </head>
 <body>
@@ -127,6 +140,10 @@
         </div>
       </div>
     </div>
+    <section id="history">
+      <p class="pane-title">Historial de tareas</p>
+      <div id="taskList"></div>
+    </section>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.min.js"></script>
@@ -179,8 +196,16 @@
         try {
           connectBtn.disabled = true;
           setStatus("Conectando…", false);
-          const name = roomInput.value.trim() || "demo";
-          const res = await fetch("/token?room=" + encodeURIComponent(name));
+const name = roomInput.value.trim() || "demo";
+      // Identidad persistente del usuario para recuperar su memoria entre sesiones.
+      let identity = localStorage.getItem("respuesta-identity");
+      if (!identity) {
+        identity = "respuesta-user-" + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem("respuesta-identity", identity);
+      }
+      const res = await fetch(
+        "/token?room=" + encodeURIComponent(name) + "&identity=" + encodeURIComponent(identity)
+      );
           if (!res.ok) throw new Error("Error obteniendo token: " + (await res.text()));
           const { token, wsUrl } = await res.json();
           await room.connect(wsUrl, token);
@@ -483,12 +508,14 @@
             if (ev.type === "analysis_ready" || ev.priority === "urgent") {
               es.close();
               runBtn.disabled = false;
+              loadHistory();
             }
           };
           es.onerror = () => {
             if (es.readyState === EventSource.CLOSED) {
               es.close();
               runBtn.disabled = false;
+              loadHistory();
               agentLine({ agent: "planner", message: "Se perdió la conexión con el bus de eventos.", priority: "silent" });
             }
           };
@@ -498,6 +525,75 @@
           runBtn.disabled = false;
         }
       });
+
+      // --- Historial de tareas pasadas ------------------------------------
+      const taskList = document.getElementById("taskList");
+
+      function fmtTs(ms) {
+        return new Date(ms).toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" });
+      }
+
+      async function expandTask(t, row) {
+        const existing = row.querySelector(".history-events");
+        if (existing) {
+          existing.remove();
+          row.classList.remove("open");
+          return;
+        }
+        try {
+          const res = await fetch("/tasks/" + encodeURIComponent(t.task_id));
+          if (!res.ok) return;
+          const body = await res.json();
+          const box = document.createElement("div");
+          box.className = "history-events";
+          for (const ev of body.events) {
+            const line = document.createElement("div");
+            line.className = "agent-line";
+            const badge = document.createElement("span");
+            badge.className = "badge " + ev.agent;
+            badge.textContent = BADGE[ev.agent] || ev.agent;
+            const msg = document.createElement("span");
+            msg.className = "msg";
+            msg.textContent = fmtTs(ev.ts) + " · " + trunc(ev.message || ev.type, 120);
+            line.append(badge, msg);
+            box.append(line);
+          }
+          row.classList.add("open");
+          row.append(box);
+        } catch (err) { /* Redis caído: historial no disponible de momento */ }
+      }
+
+      async function loadHistory() {
+        try {
+          const res = await fetch("/tasks");
+          if (!res.ok) return;
+          const tasks = await res.json();
+          taskList.innerHTML = "";
+          if (!tasks.length) {
+            const p = document.createElement("p");
+            p.className = "sub";
+            p.style.margin = "8px 0 0";
+            p.textContent = "Aún no hay tareas en el historial.";
+            taskList.append(p);
+            return;
+          }
+          for (const t of tasks) {
+            const row = document.createElement("div");
+            row.className = "history-item";
+            const badge = document.createElement("span");
+            badge.className = "badge " + (t.status === "done" ? "synth" : "planner");
+            badge.textContent = t.status === "done" ? "HECHO" : "EN CURSO";
+            const goal = document.createElement("span");
+            goal.className = "msg";
+            goal.textContent = trunc(t.goal || t.task_id, 70) + " · " + fmtTs(t.ts) + " · " + (t.last_event || "");
+            row.append(badge, goal);
+            row.addEventListener("click", () => expandTask(t, row));
+            taskList.append(row);
+          }
+        } catch (err) { /* Redis caído: no se rellena el historial */ }
+      }
+
+      loadHistory();
 
       setInterval(() => {
         if (hist.pts.length > 1 && (anyRunning() || Date.now() - hist.flowTs < 3000)) {

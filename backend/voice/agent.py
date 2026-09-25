@@ -88,7 +88,7 @@ def _resolve_user_id(ctx: JobContext) -> str:
     return "anonymous"
 
 
-def build_welcome_instructions(memory: str | None) -> str:
+def build_welcome_instructions(memory: str | None = None) -> str:
     """Compone el saludo: con memoria menciona el trabajo previo, sin ella la base."""
     if memory and str(memory).strip():
         return (
@@ -142,6 +142,7 @@ async def voice_entrypoint(
     """
     user_id = _resolve_user_id(ctx)
     tools.USER_ID.set(None if user_id == "anonymous" else user_id)
+    logger.info("Sesión de voz con identidad: %s", user_id)
     memory = await memory_service.load(None if user_id == "anonymous" else user_id)
     welcome = build_welcome_instructions(memory)
     if memory and user_id != "anonymous":

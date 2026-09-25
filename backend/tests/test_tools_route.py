@@ -30,9 +30,11 @@ class FakeCtx:
 def reset_pending():
     tools.PENDING.clear()
     tools.ACTIVE_TASKS.clear()
+    tools.USER_ID.set("anonymous")
     yield
     tools.PENDING.clear()
     tools.ACTIVE_TASKS.clear()
+    tools.USER_ID.set("anonymous")
 
 
 class _FakeRedis:
@@ -98,10 +100,10 @@ def patch_quick_answer(monkeypatch):
 
 @pytest.fixture
 def recorded_dispatch(monkeypatch):
-    calls: list[tuple[str, str]] = []
+    calls: list[tuple[str, str, str]] = []
 
-    def fake_dispatch(task_id: str, goal: str, user_id: str | None = None) -> None:
-        calls.append((task_id, goal))
+    def fake_dispatch(task_id: str, goal: str, user_id: str) -> None:
+        calls.append((task_id, goal, user_id))
 
     monkeypatch.setattr(tools, "_dispatch_orchestrator", fake_dispatch)
     return calls
@@ -129,7 +131,7 @@ async def test_orchestrator_dispatches_to_celery(reset_pending, patch_route, rec
     text = await tools.delegate_complex_task_core(FakeCtx(), "Investiga el mercado")
     assert text.startswith("He lanzado a mi equipo")
     assert len(recorded_dispatch) == 1
-    task_id, goal = recorded_dispatch[0]
+    task_id, goal, _ = recorded_dispatch[0]
     uuid.UUID(task_id)
     assert goal == "Investiga el mercado"
 
@@ -201,8 +203,20 @@ async def test_delegate_orchestrator_registers_active_task(
     ctx = FakeCtx()
     await tools.delegate_complex_task_core(ctx, "Investiga el mercado")
     active = tools.ACTIVE_TASKS[tools._session_key(ctx)]
-    task_id, goal = recorded_dispatch[0]
+    task_id, goal, _ = recorded_dispatch[0]
     assert active == {"task_id": task_id, "goal": goal}
+
+
+@pytest.mark.asyncio
+async def test_delegate_propagates_user_id_from_context(
+    reset_pending, patch_route, recorded_dispatch
+):
+    patch_route(_decision(RouteAction.ORCHESTRATOR, model=ADVANCED_MODEL))
+    tools.USER_ID.set("usuario-42")
+    await tools.delegate_complex_task_core(FakeCtx(), "Investiga el mercado")
+    tools.USER_ID.set("anonymous")
+    _, _, user_id = recorded_dispatch[0]
+    assert user_id == "usuario-42"
 
 
 @pytest.mark.asyncio
@@ -213,8 +227,8 @@ async def test_delegate_with_active_task_revokes_previous(
     ctx = FakeCtx()
     await tools.delegate_complex_task_core(ctx, "Primera tarea")
     await tools.delegate_complex_task_core(ctx, "Segunda tarea")
-    first_task_id, _ = recorded_dispatch[0]
-    second_task_id, _ = recorded_dispatch[1]
+    first_task_id, _, _ = recorded_dispatch[0]
+    second_task_id, _, _ = recorded_dispatch[1]
     assert revoke_spy == [first_task_id]
     active = tools.ACTIVE_TASKS[tools._session_key(ctx)]
     assert active["task_id"] == second_task_id
@@ -230,7 +244,7 @@ async def test_confirm_registers_active_task(
     patch_route(_decision(RouteAction.ORCHESTRATOR, model=ADVANCED_MODEL))
     await tools.confirm_execution_core(ctx, True)
     active = tools.ACTIVE_TASKS[tools._session_key(ctx)]
-    task_id, goal = recorded_dispatch[0]
+    task_id, goal, _ = recorded_dispatch[0]
     assert active == {"task_id": task_id, "goal": goal}
 
 
@@ -298,7 +312,7 @@ def test_dispatch_passes_task_id_to_celery(monkeypatch):
         calls.append({"name": name, "args": args, "task_id": task_id})
 
     monkeypatch.setattr(tasks.celery_app, "send_task", fake_send_task)
-    tools._dispatch_orchestrator("task-123", "Investiga el mercado")
+    tools._dispatch_orchestrator("task-123", "Investiga el mercado", "usuario-42")
     assert calls == [
-        {"name": "run_pipeline", "args": ["task-123", "Investiga el mercado"], "task_id": "task-123"}
+        {"name": "run_pipeline", "args": ["task-123", "Investiga el mercado", "usuario-42"], "task_id": "task-123"}
     ]

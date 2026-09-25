@@ -13,6 +13,8 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
 
 from backend.bus import redis_client
+from backend.config import settings
+from backend.memory import service as memory
 from backend.orchestrator import nodes
 
 logger = logging.getLogger(__name__)
@@ -21,11 +23,24 @@ logger = logging.getLogger(__name__)
 class ResearchState(TypedDict, total=False):
     task_id: str
     goal: str
+    user_id: str | None
     planner_model: str
     subtasks: list[str]
     results: Annotated[list[dict], operator.add]
     progress: Annotated[list[str], operator.add]
     analysis: str
+
+
+async def _load_memory(user_id: str | None) -> str | None:
+    if not settings.memory_enabled or not user_id:
+        return None
+    return await memory.load(user_id)
+
+
+async def _store_memory(user_id: str | None, goal: str, analysis: str) -> None:
+    if not settings.memory_enabled or not user_id or not analysis:
+        return
+    await memory.store(user_id, goal, analysis)
 
 
 async def _publish(
@@ -35,6 +50,7 @@ async def _publish(
     message: str,
     priority: str = "info",
     subtask: str | None = None,
+    goal: str | None = None,
 ) -> None:
     try:
         payload = {
@@ -47,6 +63,8 @@ async def _publish(
         }
         if subtask is not None:
             payload["subtask"] = subtask
+        if goal is not None:
+            payload["goal"] = goal
         await redis_client.publish_event(payload)
     except ConnectionError:
         logger.warning("Redis no disponible; el evento «%s» no se notificó por voz", event_type)
@@ -55,12 +73,18 @@ async def _publish(
 
 
 async def planner(state: ResearchState) -> dict:
-    subtasks = await nodes.plan_subtasks(state["goal"], state.get("planner_model"))
+    memory_summary = None
+    if state.get("user_id"):
+        memory_summary = await _load_memory(state["user_id"])
+    subtasks = await nodes.plan_subtasks(
+        state["goal"], state.get("planner_model"), memory=memory_summary
+    )
     await _publish(
         state["task_id"],
         "plan_ready",
         "planner",
         f"He descompuesto la tarea en {len(subtasks)} frentes de investigación.",
+        goal=state["goal"],
     )
     return {"subtasks": subtasks}
 
@@ -104,6 +128,7 @@ async def synthesize(state: ResearchState) -> dict:
     await _publish(
         state["task_id"], "analysis_ready", "synthesize", analysis, priority="info"
     )
+    await _store_memory(state.get("user_id"), state["goal"], analysis)
     return {"analysis": analysis}
 
 
