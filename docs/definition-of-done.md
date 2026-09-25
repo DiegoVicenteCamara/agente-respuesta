@@ -7,7 +7,7 @@ autónoma por agentes opencode como a las implementadas por humanos.
 
 La revisión automática de PRs (`opencode-review`) usa esta DoD como gate antes
 de mergear. Un PR cuyo trabajo **no** cumpla todos los puntos **no** se mergea:
-desde `docs/decisions/ADR-004-revision-y-merge-automatico-de-prs-con-agente-opencode.md`
+desde `docs/decisions/ADR-005-revision-y-merge-automatico-de-prs-con-agente-opencode.md`
 la norma es *merge 100% automático solo cuando la DoD se cumple*.
 
 ## Criterios
@@ -78,6 +78,6 @@ cumple de forma objetiva.
 
 ## Referencias
 
-- ADR-003: Automatización de issues con agente opencode (superseded por ADR-004).
-- ADR-004: Revisión y merge automático de PRs con agente opencode.
+- ADR-003: Automatización de issues con agente opencode (superseded por ADR-005).
+- ADR-005: Revisión y merge automático de PRs con agente opencode.
 - README → sección *Implementación autónoma de issues (opencode en CI)*.

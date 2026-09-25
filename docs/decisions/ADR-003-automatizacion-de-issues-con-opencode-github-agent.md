@@ -1,7 +1,7 @@
 # ADR-003: Automatización de issues con opencode GitHub agent
 
 ## Status
-superseded by ADR-004
+superseded by ADR-005
 
 ## Date
 2026-09-23
@@ -94,4 +94,4 @@ duplicado entre el flujo por label y el scheduler.
 - Trigger: que se agote el plan de minutos de Actions, que el proveedor `opencode`
   cambie de precio/modelos, o que aparezca un segundo consumidor de la cola.
 
-Superseded by: [ADR-004](ADR-004-revision-y-merge-automatico-de-prs-con-agente-opencode.md)
+Superseded by: [ADR-005](ADR-005-revision-y-merge-automatico-de-prs-con-agente-opencode.md)

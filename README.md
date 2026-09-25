@@ -165,7 +165,7 @@ web/index.html             # Cliente del navegador (livekit-client)
 Los issues del repo marcos con la label **`agent-ready`** son implementados de
 forma autónoma por un agente opencode y devueltos como un Pull Request listo
 para revisión. Ver `docs/decisions/ADR-003-...` y
-`docs/decisions/ADR-004-...` para el diseño completo.
+`docs/decisions/ADR-005-...` para el diseño completo.
 
 - **`agent-ready`** → el workflow `opencode-label` se dispara y el agente
   implementa el issue (rama `opencode/issue<N>-<ts>` + PR con `Closes #N`).

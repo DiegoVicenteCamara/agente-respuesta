@@ -92,6 +92,7 @@ jobs:
     needs: guard
     if: needs.guard.outputs.proceed == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout head of the PR
         uses: actions/checkout@v6
@@ -106,6 +107,7 @@ jobs:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ needs.guard.outputs.pr_number }}
+          OPENCODE_PERMISSION: '{"read":{"*":"allow","*.env":"deny","*.env.*":"deny","*.env.example":"allow"},"glob":{"*":"allow"},"grep":{"*":"allow"},"edit":{"*":"allow"},"bash":{"*":"deny","git *":"allow","gh *":"allow","python *":"allow","pip *":"allow"},"external_directory":{"/tmp/**":"allow","~/.opencode/**":"allow"},"webfetch":{"*":"deny"},"websearch":{"*":"deny"},"task":{"*":"deny"},"question":"deny","doom_loop":"deny"}'
         with:
           model: opencode/big-pickle
           prompt: |

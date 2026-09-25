@@ -1,4 +1,4 @@
-# ADR-004: Revisión y merge automático de PRs con agente opencode
+# ADR-005: Revisión y merge automático de PRs con agente opencode
 
 ## Status
 accepted
@@ -32,6 +32,11 @@ Restricciones y hechos relevantes:
   permite revalidar CI tras resolver conflictos — pero obliga a controlar
   bucles y carreras.
 - El repo usa merge commits sobre `main` (sin squash) y ramas de PR efímeras.
+- El runner de Actions es **headless**: si un permiso resuelve a `"ask"` nadie puede
+  aprobar, y opencode queda esperando indefinidamente hasta que GitHub mata el job
+  a las 6h. Esto se observó en producción antes de este ADR: el agente revisor quiso
+  escribir `/tmp/*` (permiso `external_directory`, default `"ask"`) y el run se
+  colgó 6 horas. La política de permisos es, por tanto, parte del diseño.
 
 ## Options Considered
 
@@ -64,7 +69,7 @@ Adoptar **Option A**: un workflow `.github/workflows/opencode-review.yml` que:
    **un solo revisor a la vez** en todo el repo — para nunca pisar el trabajo
    de otras issues entre ramas concurrentes.
 4. Ejecuta la acción `anomalyco/opencode/github@latest` (modelo
-   `opencode/gpt-6-sol`) con un prompt que: verifica los 5 criterios de la DoD
+   `opencode/big-pickle`) con un prompt que: verifica los 5 criterios de la DoD
    contra la evidencia estructurada de la issue; hace `git merge origin/main`
    sobre la rama y resuelve conflictos integrando ambos lados; pushea el merge;
    espera el check `test` en verde (`gh pr checks --watch`); y hace
@@ -82,6 +87,26 @@ ADR-003 decía *"Los PRs los mergea el humano; nunca se hace merge automático"*
 ahora el merge automático es la norma cuando se cumple la DoD. El resto del
 flujo de implementación autónoma descrito en ADR-003 se mantiene.
 
+### Política de permisos del agente en CI (headless)
+
+Como el runner de Actions no puede responder prompts, ningún permiso puede
+resolver a `"ask"`. Se inyecta `OPENCODE_PERMISSION` (merge deep sobre el
+config; el repo no tiene `opencode.json`) con **least-privilege**:
+
+- **Revisor** (`opencode-review.yml`): `read` (manteniendo `.env` denegado),
+  `glob`, `grep`, `edit` en workspace → allow; `bash` allowlist estricta
+  (`git *`, `gh *`, `python *`, `pip *`) con default **deny** (corta curl/wget/nc
+  y por tanto la exfiltración de `OPENCODE_API_KEY`); `external_directory`
+  `/tmp/**` y `~/.opencode/**` → allow; `webfetch`, `websearch` y `task`
+  (subagentes) → deny; `question` y `doom_loop` → deny.
+- **Implementadores** (`opencode-label`, `opencode-schedule`): misma fix del
+  cuelgue (`external_directory`, `question`, `doom_loop`) y allowlist de `bash`
+  (`git`, `gh`, `python`, `pip`, `graphify`), pero dejan `webfetch`/`websearch`
+  en default (`allow`) porque necesitan `context7`/docs de librerías.
+
+El job `review` lleva `timeout-minutes: 45` como red de seguridad: si algo
+volviera a bloquearse, el job falla en minutos en lugar de quemar 6h.
+
 ## Consequences
 - Positive:
   - Merge 100% autónomo cuando se cumple la DoD, sin cuello de botella humano.
@@ -96,6 +121,10 @@ flujo de implementación autónoma descrito en ADR-003 se mantiene.
     ambiguos nunca mergea (falla en modo seguro).
   - Cada PR genera consumo de minutos/tokens de Actions además del de
     implementación.
+  - Un permiso que resuelva a `"ask"` en CI headless equivale a un job colgado;
+    por eso la política inyectada por `OPENCODE_PERMISSION` nunca deja "ask" y
+    el revisor niega red y subagentes (menor superficie ante prompt injection
+    en issues/PRs ajenos).
 - Neutral:
   - La revisión vuelve a ejecutarse en cada push, dentro del mismo grupo de
     concurrency.
