@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from dataclasses import dataclass
 from typing import Any
 
 import httpx
@@ -31,6 +32,14 @@ from backend.decision.schemas import (
 logger = logging.getLogger(__name__)
 
 _classifier: Any | None = None
+
+
+@dataclass
+class ClassifyOutcome:
+    """Resultado de ``classify``: el triaje y, si no hay, por qué no lo hay."""
+
+    answer: TriageAnswer | None
+    detail: str | None = None
 
 
 def build_questions() -> dict[str, Any]:
@@ -139,23 +148,30 @@ def _normalize(answers: dict[str, dict[str, Any]]) -> TriageAnswer:
     )
 
 
-async def classify(goal: str) -> TriageAnswer | None:
-    """Clasifica el ``goal`` bajo timeout duro; ``None`` si no hay clave o falla todo."""
+async def classify(goal: str) -> ClassifyOutcome:
+    """Clasifica el ``goal`` bajo timeout duro; sin clave o sin transporte útil,
+    devuelve un ``ClassifyOutcome`` con ``answer=None`` y el ``detail`` del motivo."""
     if not settings.typesafe_api_key:
         logger.info("TYPESAFE_API_KEY ausente; sin triaje (fallback al orquestador)")
-        return None
+        return ClassifyOutcome(
+            None,
+            "TYPESAFE_API_KEY no configurada en .env; triaje desactivado (fail-open al orquestador)",
+        )
 
     timeout = settings.routing_timeout_ms / 1000
     questions = build_questions()
-    for transport in (_lc_classify, _http_classify):
+    failures: list[str] = []
+    transports = (("langchain_typesafe", _lc_classify), ("http", _http_classify))
+    for name, transport in transports:
         try:
             answers = await asyncio.wait_for(transport(questions, goal), timeout)
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Transporte de Jev falló (%s); probando siguiente", exc)
+            logger.warning("Transporte de Jev %s falló (%s)", name, exc)
+            failures.append(f"{name}: {type(exc).__name__}({exc})")
         else:
             try:
-                return _normalize(answers)
+                return ClassifyOutcome(_normalize(answers))
             except DecisionNormalizationError as exc:
                 logger.warning("Jev devolvió una respuesta no normalizable (%s)", exc)
-                return None
-    return None
+                return ClassifyOutcome(None, f"Respuesta de Jev no normalizable: {exc}")
+    return ClassifyOutcome(None, "Jev no disponible: " + "; ".join(failures))

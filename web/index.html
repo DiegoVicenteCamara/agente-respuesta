@@ -50,6 +50,8 @@
       padding:10px 12px; min-height:60px; max-height:240px; overflow:auto; font-size:.85rem;
     }
     .agent-line { margin:6px 0; display:flex; gap:8px; align-items:baseline; }
+    .agent-line.detail-box { flex-direction:column; align-items:flex-start; gap:0; }
+    .detail-box .detail { font-size:.7rem; color:#64748b; font-style:italic; margin-left:24px; }
     .badge {
       flex-shrink:0; font-size:.7rem; font-weight:700; padding:2px 7px; border-radius:999px;
       color:#082f49; letter-spacing:.3px;
@@ -194,8 +196,16 @@
         try {
           connectBtn.disabled = true;
           setStatus("Conectando…", false);
-          const name = roomInput.value.trim() || "demo";
-          const res = await fetch("/token?room=" + encodeURIComponent(name));
+const name = roomInput.value.trim() || "demo";
+      // Identidad persistente del usuario para recuperar su memoria entre sesiones.
+      let identity = localStorage.getItem("respuesta-identity");
+      if (!identity) {
+        identity = "respuesta-user-" + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem("respuesta-identity", identity);
+      }
+      const res = await fetch(
+        "/token?room=" + encodeURIComponent(name) + "&identity=" + encodeURIComponent(identity)
+      );
           if (!res.ok) throw new Error("Error obteniendo token: " + (await res.text()));
           const { token, wsUrl } = await res.json();
           await room.connect(wsUrl, token);
@@ -273,6 +283,13 @@
         msg.className = "msg";
         msg.textContent = ev.priority === "silent" ? "▸ " + ev.message : ev.message;
         div.append(badge, msg);
+        if (ev.detail) {
+          div.classList.add("detail-box");
+          const det = document.createElement("div");
+          det.className = "detail";
+          det.textContent = "▸ " + ev.detail;
+          div.append(det);
+        }
         agentsEl.append(div);
       }
 

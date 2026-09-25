@@ -18,6 +18,7 @@ from celery import Celery
 from backend.config import settings
 from backend.decision import respond, router
 from backend.decision.schemas import RouteAction
+from backend.orchestrator import cost
 
 logger = logging.getLogger(__name__)
 
@@ -45,36 +46,48 @@ async def _publish(payload: dict) -> None:
         logger.warning("No se pudo publicar el evento en Redis")
 
 
-def _run_graph(task_id: str, goal: str, planner_model: str | None) -> str:
+def _run_graph(
+    task_id: str, goal: str, planner_model: str | None, user_id: str | None = None
+) -> str:
     from backend.orchestrator.graph import build_graph
 
-    graph = build_graph()
-    initial = {
-        "task_id": task_id,
-        "goal": goal,
-        "results": [],
-        "progress": [],
-        "planner_model": planner_model or "",
-    }
-    result = asyncio.run(graph.ainvoke(initial))
-    return result.get("analysis", "")
+    async def _inner() -> str:
+        model = planner_model or settings.openai_planner_model
+        async with cost.tracked():
+            graph = build_graph()
+            initial = {
+                "task_id": task_id,
+                "goal": goal,
+                "user_id": user_id,
+                "results": [],
+                "progress": [],
+                "planner_model": planner_model or "",
+            }
+            result = await graph.ainvoke(initial)
+            await cost.publish_cost_ready(task_id, model)
+            return result.get("analysis", "")
+
+    return asyncio.run(_inner())
 
 
 def _handle_fast(task_id: str, goal: str, model: str) -> str:
-    answer = asyncio.run(respond.quick_answer(goal, model=model))
-    asyncio.run(
-        _publish(
-            {
-                "task_id": task_id,
-                "type": "analysis_ready",
-                "agent": "jev-gate",
-                "message": answer,
-                "priority": "info",
-                "goal": goal,
-            }
-        )
-    )
-    return answer
+    async def _inner() -> str:
+        async with cost.tracked():
+            answer = await respond.quick_answer(goal, model=model)
+            await _publish(
+                {
+                    "task_id": task_id,
+                    "type": "analysis_ready",
+                    "agent": "jev-gate",
+                    "message": answer,
+                    "priority": "info",
+                    "goal": goal,
+                }
+            )
+            await cost.publish_cost_ready(task_id, model)
+            return answer
+
+    return asyncio.run(_inner())
 
 
 def _handle_blocked(task_id: str, goal: str) -> str:
@@ -98,7 +111,7 @@ def _handle_blocked(task_id: str, goal: str) -> str:
 
 
 @celery_app.task(name="run_pipeline")
-def run_pipeline(task_id: str, goal: str) -> str:
+def run_pipeline(task_id: str, goal: str, user_id: str | None = None) -> str:
     try:
         decision = asyncio.run(router.route(task_id, goal))
         if decision.action == RouteAction.FAST:
@@ -107,7 +120,7 @@ def run_pipeline(task_id: str, goal: str) -> str:
             return _handle_blocked(task_id, goal)
         # PROPOSE_COMMIT llega aquí ya confirmado (voz) o directo (debug): se
         # escala al orquestador con el modelo que fijó la política.
-        return _run_graph(task_id, goal, decision.model)
+        return _run_graph(task_id, goal, decision.model, user_id)
     except Exception as exc:  # noqa: BLE001
         logger.exception("Pipeline falló para task_id=%s", task_id)
         raise exc

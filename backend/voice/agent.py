@@ -17,8 +17,10 @@ from livekit.plugins import openai
 
 from backend.bus import redis_client
 from backend.config import settings
-from backend.voice import notifier
-from backend.voice.tools import confirm_execution, delegate_complex_task
+from backend.memory import service as memory
+from backend.voice import notifier, tools
+from backend.voice.earcon import play_earcon
+from backend.voice.tools import cancel_task, confirm_execution, delegate_complex_task
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +33,8 @@ SYSTEM_PROMPT = (
     "brevemente y NO inventes resultados: espera los avisos que llegarán por voz. "
     "Si pediste confirmación por una acción de riesgo y el usuario responde con su "
     "decisión, llama a la herramienta confirm_execution con esa respuesta. "
+    "Si el usuario pide parar, detener o cancelar lo que estás haciendo, llama a "
+    "la herramienta cancel_task para detener a los subagentes. "
     "El usuario puede interrumpirte en cualquier momento."
 )
 
@@ -38,6 +42,29 @@ WELCOME_INSTRUCTIONS = (
     "Saluda brevemente al usuario y dile que estás listo para poner a tu equipo "
     "de subagentes a trabajar."
 )
+
+
+def build_welcome_instructions(memory_summary: str | None = None) -> str:
+    """Instrucciones de bienvenida; mencionan el contexto previo si existe memoria."""
+    if memory_summary:
+        return (
+            WELCOME_INSTRUCTIONS
+            + f" Menciona de forma natural que la última vez trabajó en: "
+            f"{memory_summary}."
+        )
+    return WELCOME_INSTRUCTIONS
+
+
+def _resolve_user_id(ctx: JobContext) -> str:
+    """Resuelve la identidad del usuario humano de la sala.
+
+    Prioridad: participante humano remoto > claims del token > ``anonymous``.
+    """
+    for participant in ctx.room.remote_participants.values():
+        if not getattr(participant, "is_agent", False):
+            return participant.identity
+    claims = ctx.token_claims() or {}
+    return claims.get("identity") or "anonymous"
 
 
 class OrchestratorAgent(Agent):
@@ -49,7 +76,7 @@ class OrchestratorAgent(Agent):
                 voice=settings.openai_realtime_voice,
                 temperature=0.8,
             ),
-            tools=[delegate_complex_task, confirm_execution],
+            tools=[delegate_complex_task, confirm_execution, cancel_task],
             allow_interruptions=True,
         )
 
@@ -64,13 +91,18 @@ async def _listen_for_updates(session: AgentSession) -> None:
         if message.get("type") != "message":
             continue
         try:
-            text = notifier.build_spoken_update(json.loads(message["data"]))
+            payload = json.loads(message["data"])
         except (json.JSONDecodeError, TypeError):
+            continue
+        try:
+            text = notifier.build_spoken_update(payload)
+        except (TypeError, AttributeError):
             text = None
         if not text:
             continue
         logger.info("Notificación por voz: %s", text)
         try:
+            await play_earcon(session, payload)
             await session.generate_reply(instructions=text, allow_interruptions=True)
         except Exception:  # noqa: BLE001
             logger.exception("Fallo al inyectar la actualización por voz")
@@ -84,7 +116,18 @@ async def voice_entrypoint(ctx: JobContext) -> None:
     session = AgentSession()
     await session.start(room=ctx.room, agent=OrchestratorAgent())
     asyncio.create_task(_listen_for_updates(session))
-    await session.generate_reply(instructions=WELCOME_INSTRUCTIONS)
+
+    user_id = _resolve_user_id(ctx)
+    tools.USER_ID.set(user_id)
+    logger.info("Sesión de voz con identidad: %s", user_id)
+
+    memory_summary = None
+    if settings.memory_enabled:
+        memory_summary = await memory.load(user_id)
+    welcome = build_welcome_instructions(memory_summary)
+    await session.generate_reply(instructions=welcome)
+    if memory_summary:
+        await memory.publish_recalled(user_id, f"Memoria de {user_id}: {memory_summary}")
 
 
 if __name__ == "__main__":

@@ -39,6 +39,36 @@ class Settings:
         )
         self.routing_confidence_min: float = float(_get("ROUTING_CONFIDENCE_MIN", "0.6"))
         self.routing_timeout_ms: int = int(_get("ROUTING_TIMEOUT_MS", "600"))
+        self.cost_tracking_enabled: bool = _get(
+            "COST_TRACKING_ENABLED", "true"
+        ).lower() != "false"
+        self.cost_eur_per_usd: float = float(_get("COST_EUR_PER_USD", "1.0"))
+        self.pricing_usd: dict[str, tuple[float, float]] = self._load_pricing()
+        self.memory_enabled: bool = _get("MEMORY_ENABLED", "true").lower() != "false"
+        self.memory_ttl_days: int = int(_get("MEMORY_TTL_DAYS", "30"))
+        self.memory_max_chars: int = int(_get("MEMORY_MAX_CHARS", "2000"))
+        self.cache_ttl_seconds: int = int(_get("CACHE_TTL_SECONDS", "86400"))
+        self.earcon_enabled: bool = _get("EARCON_ENABLED", "false").lower() not in (
+            "false",
+            "0",
+            "no",
+            "off",
+            "",
+        )
+        self.earcon_path: str = _get("EARCON_PATH", "")
+
+    def _load_pricing(self) -> dict[str, tuple[float, float]]:
+        defaults = {
+            "GPT_4O_MINI": (0.15, 0.60),
+            "GPT_4O": (2.50, 10.00),
+        }
+        return {
+            name: (
+                float(_get(f"PRICING_{name}_PER_1M_IN", str(price_in))),
+                float(_get(f"PRICING_{name}_PER_1M_OUT", str(price_out))),
+            )
+            for name, (price_in, price_out) in defaults.items()
+        }
 
 
 settings = Settings()

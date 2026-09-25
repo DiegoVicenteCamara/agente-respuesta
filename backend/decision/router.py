@@ -13,6 +13,7 @@ from typing import Awaitable, Callable
 from backend.bus import redis_client
 from backend.config import settings
 from backend.decision import jev
+from backend.decision.jev import ClassifyOutcome
 from backend.decision.schemas import (
     ComplexityTier,
     RouteAction,
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 RISK_REVERSIBLE = 1.0
 
-ClassifierT = Callable[[str], Awaitable["TriageAnswer | None"]]
+ClassifierT = Callable[[str], Awaitable["ClassifyOutcome"]]
 
 
 def decide(
@@ -96,15 +97,17 @@ def fallback_decision(
     *,
     fast_model: str,
     reason: str = "jev_unavailable",
+    detail: str | None = None,
 ) -> RouteDecision:
     """Decisión de fallback fail-open: todo se escala al orquestador."""
-    logger.warning("Fallback de ruteo: %s", reason)
+    logger.warning("Fallback de ruteo: %s — %s", reason, detail or "sin detalle")
     return RouteDecision(
         action=RouteAction.ORCHESTRATOR,
         reason=reason,
         task_id=task_id,
         model=fast_model,
         fallback=True,
+        detail=detail,
     )
 
 
@@ -124,16 +127,19 @@ async def route(
 
     started = time.perf_counter()
     try:
-        triage = await classify(goal)
+        outcome = await classify(goal)
+        answer = outcome.answer
+        detail = outcome.detail
     except Exception as exc:  # noqa: BLE001
         logger.warning("Clasificador de Jev lanzó excepción (%s); fallback", exc)
-        triage = None
+        answer = None
+        detail = f"{type(exc).__name__}: {exc}"
     latency_ms = int((time.perf_counter() - started) * 1000)
 
-    if triage is None:
-        decision = fallback_decision(task_id, fast_model=fast)
+    if answer is None:
+        decision = fallback_decision(task_id, fast_model=fast, detail=detail)
     else:
-        decision = decide(triage, cfg, fast, advanced)
+        decision = decide(answer, cfg, fast, advanced)
 
     decision.task_id = task_id
     decision.latency_ms = latency_ms
@@ -158,6 +164,7 @@ async def _publish_event(decision: RouteDecision) -> None:
         "model": decision.model,
         "latency_ms": decision.latency_ms,
         "fallback": decision.fallback,
+        "detail": decision.detail,
     }
     try:
         await redis_client.publish_event(payload)

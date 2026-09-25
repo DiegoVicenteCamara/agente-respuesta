@@ -1,0 +1,104 @@
+name: opencode-label
+
+on:
+  issues:
+    types: [labeled]
+
+env:
+  OPENCODE_VERSION: v1.18.32
+  MODEL: opencode/muse-spark-1.3-contributor-free
+
+jobs:
+  opencode:
+    if: startsWith(github.event.label.name, 'agent-ready')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: opencode-label-${{ github.event.issue.number }}
+      cancel-in-progress: false
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Mark issue as in progress
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo
+            const { issue } = context.payload
+            await github.rest.issues.removeLabel({
+              owner, repo, issue_number: issue.number, name: 'agent-ready'
+            })
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: issue.number, labels: ['agent-in-progress']
+            })
+
+      - name: Cache opencode
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.opencode/bin
+          key: opencode-${{ runner.os }}-${{ runner.arch }}-${{ env.OPENCODE_VERSION }}
+
+      - name: Install opencode
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: curl -fsSL https://opencode.ai/install | bash -s -- --version ${{ env.OPENCODE_VERSION }}
+
+      - name: Add opencode to PATH
+        shell: bash
+        run: echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+
+      - name: Run opencode
+        shell: bash
+        run: opencode github run
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENCODE_PERMISSION: '{"bash":{"*":"deny","git *":"allow","gh *":"allow","python *":"allow","pip *":"allow","graphify *":"allow"},"external_directory":{"/tmp/**":"allow","~/.opencode/**":"allow"},"question":"deny","doom_loop":"deny"}'
+          PROMPT: |
+            Implement the GitHub issue in this repository.
+
+            Follow AGENTS.md and its skills:
+            - For creative work, follow the brainstorming/spec-driven milestones in
+              the repository workflow; if they require human approval gates, work
+              through the design and note the approval point for the PR review.
+            - Run the test suite: after installing dependencies
+              (pip install -r backend/requirements.txt), run `python -m pytest -q`
+              and do not finish until the whole suite is green.
+            - Follow the repo's style, update the graphify knowledge graph if code
+              files changed, and write tests for the new behavior.
+            - Before finishing, read docs/definition-of-done.md and post a comment
+              on the issue with the structured evidence checklist it defines
+              ("## Evidencias DoD"): what was done, commits, PR number, validation
+              result, and documentation updated (or "no aplica"). Every box of the
+              checklist must be checked with real links, because the autonomous
+              reviewer will only merge the PR when the DoD is met.
+
+            Use `gh` to manage labels and comments when appropriate (for example,
+            to respond on the issue, mark blockers, or post the DoD evidence).
+            PR creation and the `Closes #N` line are handled automatically after
+            your response.
+
+      - name: Restore agent-ready on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo
+            const { issue } = context.payload
+            await github.rest.issues.removeLabel({
+              owner, repo, issue_number: issue.number, name: 'agent-in-progress'
+            }).catch(() => {})
+            await github.rest.issues.addLabels({
+              owner, repo, issue_number: issue.number, labels: ['agent-ready']
+            })
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: issue.number,
+              body: 'El agente no pudo completar este issue; devuelto a `agent-ready`.'
+            })
