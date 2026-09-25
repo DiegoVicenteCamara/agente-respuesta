@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Respuesta — Agente de voz con subagentes proactivos</title>
+  <meta name="description" content="Agente de voz que delega tareas complejas a subagentes en segundo plano y te interrumpe por voz con los avances. Quickstart, arquitectura y docs.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="hero">
+    <p class="kicker">Landing · <a href="https://github.com/DiegoVicenteCamara/agente-respuesta">GitHub del proyecto</a></p>
+    <h1>Respuesta — Agente de voz con subagentes proactivos</h1>
+    <p class="pitch">
+      Llama desde tu navegador, pide una tarea compleja (investigar, resumir,
+      comparar…) y un <strong>orquestador la descompone y delega a subagentes en
+      segundo plano</strong>. Cuando hay avances, el agente
+      <strong>te interrumpe por voz</strong> con la novedad, respetando los turnos
+      de conversación.
+    </p>
+    <p class="cta">
+      <a class="btn" href="#quickstart">Empezar en 4 pasos</a>
+      <a class="btn ghost" href="https://github.com/DiegoVicenteCamara/agente-respuesta">Ver código</a>
+    </p>
+    <p class="note">Sin demo en vivo: la voz en tiempo real (OpenAI/LiveKit) tiene coste continuo y no se ofrece como servicio público. Puedes probarlo en local o en modo prueba sin voz.</p>
+  </header>
+
+  <main>
+    <section id="arquitectura" aria-labelledby="arquitectura-h">
+      <h2 id="arquitectura-h">Explicación — arquitectura</h2>
+      <p>
+        Los planos de <strong>voz</strong> (síncrono, &lt;800&nbsp;ms) y de
+        <strong>ejecución</strong> (asíncrono) están desacoplados mediante un bus
+        de eventos Redis, fiel a la investigación
+        <em>Sistemas Multiagente y Voz Interactiva</em>.
+      </p>
+      <pre class="diagram" aria-label="Diagrama de arquitectura">[Navegador (LiveKit) ⇄ WebRTC] → backend (FastAPI /token)
+                                        │
+                    Worker de voz LiveKit (OpenAI Realtime API)
+                        ├─ tool delegate_complex_task → despacha a Celery
+                        └─ listener Redis → habla proactivamente
+                                        │
+                              Redis (pub/sub + broker)
+                                        │
+         Celery worker → LangGraph (supervisor + subagentes en paralelo)
+             planner → research (fan-out) → synthesize (publican eventos)</pre>
+      <table class="stack">
+        <caption>Stack</caption>
+        <tr><th>Componente</th><th>Tecnología</th></tr>
+        <tr><td>Voz en tiempo real</td><td>LiveKit Agents 1.8 + OpenAI Realtime API (voz-a-voz)</td></tr>
+        <tr><td>Orquestación multiagente</td><td>LangGraph (supervisor con fan-out en paralelo)</td></tr>
+        <tr><td>Ejecución duradera</td><td>Celery (worker) + Redis (broker y bus de eventos)</td></tr>
+        <tr><td>Búsqueda web</td><td>Tavily (si hay clave) o DuckDuckGo (sin clave)</td></tr>
+        <tr><td>Web del navegador</td><td>FastAPI + <code>livekit-client</code></td></tr>
+      </table>
+      <h3>Cómo notifica</h3>
+      <ul>
+        <li><code>priority: silent</code> → actualiza estado, no interrumpe.</li>
+        <li><code>priority: info</code> → <em>«Disculpa que te interrumpa…»</em> con barge-in.</li>
+        <li><code>priority: urgent</code> → <em>«Necesito tu atención…»</em>.</li>
+      </ul>
+    </section>
+
+    <section id="quickstart" aria-labelledby="quickstart-h">
+      <h2 id="quickstart-h">Tutorial — quickstart en 4 pasos</h2>
+      <ol>
+        <li>Alta en servicios (Fase 0): LiveKit Cloud, OpenAI, Redis local con Docker.</li>
+        <li>Configura y crea el entorno:
+          <pre><code>cp .env.example .env
+# rellena LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, OPENAI_API_KEY
+python3 -m venv .venv
+.venv/bin/pip install -r backend/requirements.txt</code></pre>
+        </li>
+        <li>Arranca Redis, el worker Celery, el agente de voz y la web:
+          <pre><code>redis-server
+.venv/bin/celery -A backend.orchestrator.tasks.celery_app worker -P solo -l info
+.venv/bin/python -m backend.voice.agent dev
+.venv/bin/uvicorn backend.api.main:app --port 7860</code></pre>
+        </li>
+        <li>Abre <code>http://localhost:7860</code>, pulsa <strong>Llamar</strong> y pide: <em>«Investiga las últimas novedades sobre agentes de IA en español y resúmelo»</em>.</li>
+      </ol>
+      <h3>Modo prueba (sin voz, sin créditos OpenAI)</h3>
+      <p>
+        La web incluye un panel <strong>Modo prueba</strong>: escribe un objetivo,
+        pulsa <strong>Iniciar tarea</strong> y verás los avisos
+        (<code>plan_ready</code> → <code>subtask_done</code> → <code>analysis_ready</code>)
+        por el mismo bus Redis con la misma prioridad que usaría la voz.
+        Detrás: <code>POST /debug/run</code> despacha a Celery y
+        <code>GET /debug/stream</code> (SSE) lo reenvía al navegador.
+        Sin <code>TAVILY_API_KEY</code> se usa DuckDuckGo.
+      </p>
+    </section>
+
+    <section id="automatizacion" aria-labelledby="automatizacion-h">
+      <h2 id="automatizacion-h">Cómo colaborar — automatización agent-ready</h2>
+      <p>
+        Los issues con la label <code>agent-ready</code> los implementa de forma
+        autónoma un agente opencode y los devuelve como Pull Request listo para
+        revisión. Detalles en
+        <a href="https://github.com/DiegoVicenteCamara/agente-respuesta#implementaci%C3%B3n-aut%C3%B3noma-de-issues-opencode-en-ci">la sección de automatización del README</a>
+        y en el <a href="decisions/ADR-003-automatizacion-de-issues-con-opencode-github-agent.md">ADR-003</a>.
+      </p>
+    </section>
+
+    <section id="docs" aria-labelledby="docs-h">
+      <h2 id="docs-h">Referencia — docs, specs y ADRs</h2>
+      <ul>
+        <li><a href="https://github.com/DiegoVicenteCamara/agente-respuesta">README y guía completa</a> (vuelve a esta landing desde el badge de la cabecera).</li>
+        <li><a href="https://github.com/DiegoVicenteCamara/agente-respuesta/blob/main/SPEC-jev-router.md">Spec aprobada: Jev System 1 dual-model router</a>.</li>
+        <li><a href="decisions/ADR-001-grafo-de-organizacion-tipo-ramas-github-con-columnas-reutilizables-por-tarea.md">ADR-001: grafo de organización tipo ramas GitHub</a>.</li>
+        <li><a href="decisions/ADR-002-publicar-causa-de-jev-unavailable-en-routing-decision-detalle.md">ADR-002: causa de jev-unavailable en routing-decision</a>.</li>
+        <li><a href="decisions/ADR-003-automatizacion-de-issues-con-opencode-github-agent.md">ADR-003: automatización de issues con opencode</a>.</li>
+        <li><a href="decisions/ADR-004-landing-page-en-github-pages-desde-docs-con-deploy-por-actions.md">ADR-004: esta landing en GitHub Pages</a>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <p>
+      Sitio estático sin rastreo ni secretos, servido con GitHub Pages desde
+      <code>docs/</code> (<a href="decisions/ADR-004-landing-page-en-github-pages-desde-docs-con-deploy-por-actions.md">ADR-004</a>).
+      Código en <a href="https://github.com/DiegoVicenteCamara/agente-respuesta">GitHub</a> ·
+      <a href="https://github.com/DiegoVicenteCamara/agente-respuesta">Volver al README</a>
+    </p>
+  </footer>
+</body>
+</html>
