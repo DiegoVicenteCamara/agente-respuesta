@@ -12,6 +12,7 @@ from livekit.api import AccessToken, VideoGrants
 from pydantic import BaseModel
 from redis.asyncio import Redis
 
+from backend.bus import redis_client
 from backend.config import settings
 
 app = FastAPI(title="Respuesta — Agente de voz con subagentes", version="0.1.0")
@@ -38,7 +39,7 @@ async def get_token(
             status_code=500,
             detail="LIVEKIT_API_KEY / LIVEKIT_API_SECRET no configurados en .env",
         )
-    identity = identity or f"user-{uuid.uuid4().hex[:8]}"
+    identity = identity or f"participant-{uuid.uuid4().hex[:8]}"
     token = (
         AccessToken(settings.livekit_api_key, settings.livekit_api_secret)
         .with_identity(identity)
@@ -64,6 +65,27 @@ async def debug_run(body: RunGoal) -> dict:
     task_id = f"web-{uuid.uuid4().hex[:8]}"
     await asyncio.to_thread(run_pipeline.delay, task_id=task_id, goal=goal)
     return {"task_id": task_id}
+
+
+@app.get("/tasks")
+async def list_tasks() -> list[dict]:
+    """Historial de tareas pasadas: resumen por tarea, creación reciente primero."""
+    try:
+        return await redis_client.list_tasks()
+    except Exception:  # noqa: BLE001
+        return []
+
+
+@app.get("/tasks/{task_id}")
+async def get_task(task_id: str) -> dict:
+    """Eventos ordenados de una tarea pasada."""
+    try:
+        detail = await redis_client.get_task_events(task_id)
+    except Exception:  # noqa: BLE001
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    if not detail["events"]:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+    return {"task_id": task_id, "goal": detail["goal"], "events": detail["events"]}
 
 
 @app.get("/debug/stream")
