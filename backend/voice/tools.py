@@ -10,10 +10,10 @@ Cada delegación pasa primero por el triaje Sistema 1 (Jev):
 - ``cancel_task``: revoca por voz la tarea Celery activa de la sesión.
 """
 
-import contextvars
 import logging
 import time
 import uuid
+from contextvars import ContextVar
 
 from livekit.agents import RunContext, function_tool
 
@@ -24,11 +24,9 @@ from backend.orchestrator import cost
 
 logger = logging.getLogger(__name__)
 
-# Identidad del usuario de la llamada, resuelta por el entrypoint del agente de
-# voz. Se propaga a Celery para asociar las tareas con su memoria.
-USER_ID: contextvars.ContextVar[str] = contextvars.ContextVar(
-    "user_id", default="anonymous"
-)
+#: Identidad del usuario de la sesión de voz activa (issue #8).
+#: Lo fija ``voice_entrypoint`` al resolver participante > claims > anonymous.
+USER_ID: ContextVar[str | None] = ContextVar("voice_user_id", default=None)
 
 BLOCK_MESSAGE = (
     "No puedo ejecutar esa solicitud: parece contener intentos de manipular mis "
@@ -67,13 +65,12 @@ async def _fast_answer(task_id: str, goal: str, model: str) -> str:
         return answer
 
 
-def _dispatch_orchestrator(task_id: str, goal: str, user_id: str) -> None:
+def _dispatch_orchestrator(task_id: str, goal: str, user_id: str | None = None) -> None:
     from backend.orchestrator.tasks import celery_app
 
-    celery_app.send_task(
-        "run_pipeline", args=[task_id, goal, user_id], task_id=task_id
-    )
-    logger.info("Tarea delegada: task_id=%s goal=%r user_id=%s", task_id, goal, user_id)
+    args = [task_id, goal] if user_id is None else [task_id, goal, user_id]
+    celery_app.send_task("run_pipeline", args=args, task_id=task_id)
+    logger.info("Tarea delegada: task_id=%s goal=%r user_id=%r", task_id, goal, user_id)
 
 
 def _revoke_task(task_id: str) -> None:
