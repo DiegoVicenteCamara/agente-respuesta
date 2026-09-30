@@ -22,6 +22,7 @@ WEB_DIR = Path(__file__).resolve().parents[2] / "web"
 
 class RunGoal(BaseModel):
     goal: str
+    identity: str | None = None
 
 
 @app.get("/", include_in_schema=False)
@@ -55,15 +56,24 @@ async def get_token(
 
 
 @app.post("/debug/run")
-async def debug_run(body: RunGoal) -> dict:
+async def debug_run(
+    body: RunGoal,
+    identity: str | None = Query(None, description="Identidad opcional del usuario"),
+) -> dict:
     """Lanza una tarea de prueba a los subagentes (Celery) sin pasar por la voz."""
     goal = body.goal.strip()
     if not goal:
         raise HTTPException(status_code=400, detail="El objetivo no puede estar vacío")
     from backend.orchestrator.tasks import run_pipeline
 
+    raw_identity = (body.identity or identity or "").strip()
+    user_id = raw_identity or None
+    if user_id == "anonymous":
+        user_id = None
     task_id = f"web-{uuid.uuid4().hex[:8]}"
-    await asyncio.to_thread(run_pipeline.delay, task_id=task_id, goal=goal)
+    await asyncio.to_thread(
+        run_pipeline.delay, task_id=task_id, goal=goal, user_id=user_id
+    )
     return {"task_id": task_id}
 
 

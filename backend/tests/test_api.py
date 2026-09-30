@@ -68,6 +68,59 @@ def test_debug_run_dispatches_to_celery(monkeypatch):
     assert body["task_id"].startswith("web-")
     assert calls["goal"] == "probar redis"
     assert calls["task_id"] == body["task_id"]
+    assert calls["user_id"] is None
+
+
+def test_debug_run_propagates_identity_from_body(monkeypatch):
+    import backend.orchestrator.tasks as tasks
+
+    calls = {}
+
+    class Fake:
+        @staticmethod
+        def delay(**kwargs):
+            calls.update(kwargs)
+
+    monkeypatch.setattr(tasks, "run_pipeline", Fake())
+    client = TestClient(main.app)
+    resp = client.post("/debug/run", json={"goal": "probar memoria", "identity": "alice"})
+    assert resp.status_code == 200
+    assert calls["goal"] == "probar memoria"
+    assert calls["user_id"] == "alice"
+
+
+def test_debug_run_propagates_identity_from_query(monkeypatch):
+    import backend.orchestrator.tasks as tasks
+
+    calls = {}
+
+    class Fake:
+        @staticmethod
+        def delay(**kwargs):
+            calls.update(kwargs)
+
+    monkeypatch.setattr(tasks, "run_pipeline", Fake())
+    client = TestClient(main.app)
+    resp = client.post("/debug/run?identity=bob", json={"goal": "probar memoria"})
+    assert resp.status_code == 200
+    assert calls["user_id"] == "bob"
+
+
+def test_debug_run_anonymous_degrades_to_none(monkeypatch):
+    import backend.orchestrator.tasks as tasks
+
+    calls = {}
+
+    class Fake:
+        @staticmethod
+        def delay(**kwargs):
+            calls.update(kwargs)
+
+    monkeypatch.setattr(tasks, "run_pipeline", Fake())
+    client = TestClient(main.app)
+    resp = client.post("/debug/run", json={"goal": "hola", "identity": "anonymous"})
+    assert resp.status_code == 200
+    assert calls["user_id"] is None
 
 
 def test_debug_run_requires_goal():
