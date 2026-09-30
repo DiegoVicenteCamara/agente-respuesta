@@ -25,15 +25,16 @@ on:
 
 env:
   OPENCODE_VERSION: v1.18.32
-  MODEL: opencode/big-pickle
+  MODEL: opencode/nemotron-3.5-lightning-free
   CATEGORY: ${{ inputs.category || 'all' }}
   COUNT: ${{ inputs.count || '5' }}
 
 jobs:
   generate-issues:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     concurrency:
-      group: opencode-issues
+      group: opencode-issues-${{ github.ref }}
       cancel-in-progress: false
     permissions:
       id-token: write
@@ -62,7 +63,7 @@ jobs:
 
       - name: Run opencode (generate issues)
         shell: bash
-        run: opencode github run
+        run: opencode github run --print-logs --log-level INFO
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
