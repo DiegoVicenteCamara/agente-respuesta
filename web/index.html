@@ -493,10 +493,11 @@ const name = roomInput.value.trim() || "demo";
               if (es.readyState === EventSource.CLOSED) reject(new Error("No se pudo conectar al bus"));
             };
           });
+          const storedIdentity = localStorage.getItem("respuesta-identity");
           const res = await fetch("/debug/run", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ goal }),
+            body: JSON.stringify(storedIdentity ? { goal, identity: storedIdentity } : { goal }),
           });
           if (!res.ok) throw new Error((await res.json()).detail || "error");
           const { task_id } = await res.json();
