@@ -36,6 +36,7 @@ jobs:
       group: opencode-issues
       cancel-in-progress: false
     permissions:
+      id-token: write
       issues: write
       contents: read
     steps:
