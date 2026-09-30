@@ -30,7 +30,7 @@ proceso no supervisado.
   - Triage por política explícita: solo las features llegan a `agent-ready`; el resto
     (seguridad, UX/UI, docs, workflows) esperan aprobación humana.
 - Cons:
-  - Las candidatas dependen de la calidad del modelo (opencode/big-pickle); malas
+  - Las candidatas dependen de la calidad del modelo (opencode/muse-spark), malas
     issues requieren limpieza manual.
   - El cron semanal puede acumular issues si no se triagean.
 
@@ -50,12 +50,25 @@ proceso no supervisado.
 
 ## Decision
 Crear el workflow `.github/workflows/opencode-issues.yml` que ejecuta un agente
-opencode con el modelo gratuito `opencode/big-pickle`, autenticado con el secreto
+opencode con el modelo gratuito `opencode/muse-spark-1.3-contributor-free` (probado
+vía CLI `opencode github run`; `big-pickle` y `nemotron-3.5-lightning-free` se
+descartaron por reproducir un cuelgue en CI — ver abajo), autenticado con el secreto
 del repo `OPENCODE_API_KEY` (mismo que `opencode-label`/`opencode-schedule`), con
 permisos restringidos a `gh` (creación de issues) y sin capacidad de commit/push/PR.
 
 Cadencia: semanal (cron `0 8 * * 1`) + `workflow_dispatch` con inputs `category`
 (default `all`) y `count` (default `5`, rango razonable 4-6).
+
+Hardening aplicado (2026-09-30, fix del cuelgue):
+- `OPENCODE_PERMISSION` incluye `external_directory: {"/tmp/**":"allow",
+  "~/.opencode/**":"allow"}` (igual que `opencode-schedule`/`opencode-review`): sin
+  ello `opencode github run` entra en bucle de petición de permiso en CI (nadie
+  aprueba un `ask`) y el job se queda colgado horas silenciosamente.
+- `timeout-minutes: 30` en la job para que cualquier problema futuro falle rápido y
+  visible en vez de agotar el límite de 6h del runner.
+- `opencode github run --print-logs --log-level INFO` para emitir logs del paso.
+- `concurrency.group: opencode-issues-${{ github.ref }}` para que el run de una rama
+  de prueba no bloquee al de `main`.
 
 Política de triage: las issues de tipo **feature** (`enhancement`) se etiquetan
 además con `agent-ready` y entran solas en el pipeline. Seguridad/protección de

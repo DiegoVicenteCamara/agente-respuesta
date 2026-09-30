@@ -187,7 +187,7 @@ para revisión. Ver `docs/decisions/ADR-003-...` y
 ### Generación de issues (`opencode-issues`)
 
 El workflow `opencode-issues` propone **issues nuevas automáticamente**: un agente
-opencode (modelo `opencode/big-pickle`, autenticado con el secreto
+opencode (modelo `opencode/muse-spark-1.3-contributor-free`, autenticado con el secreto
 `OPENCODE_API_KEY`) crea entre 4-6 candidatas por ejecución — features, seguridad /
 protección de ramas, UX/UI del panel web, documentación e ideas de nuevas
 automatizaciones — siguiendo el formato de issue del repo y evitando duplicados.
