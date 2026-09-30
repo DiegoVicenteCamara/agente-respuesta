@@ -1,0 +1,163 @@
+name: opencode-review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to force review"
+        required: false
+        type: string
+
+concurrency:
+  group: opencode-review
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+  id-token: write
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_number: ${{ steps.guard.outputs.pr_number }}
+      head_ref: ${{ steps.guard.outputs.head_ref }}
+      proceed: ${{ steps.guard.outputs.proceed }}
+    steps:
+      - name: Compute PR number and guards
+        id: guard
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.payload.pull_request?.number
+              ?? Number(process.env.PR_INPUT || '');
+            if (!prNumber) {
+              console.log('No PR number available; skipping.');
+              return;
+            }
+
+            const { owner, repo } = context.repo;
+            const pr = await github.rest.pulls.get({ owner, repo, pull_number: prNumber })
+              .then(r => r.data).catch(() => null);
+            if (!pr) {
+              console.log(`PR #${prNumber} not found; skipping.`);
+              return;
+            }
+            if (!pr.merged_at && (pr.state === 'closed' || pr.state === 'merged')) {
+              console.log(`PR #${prNumber} is closed/merged; skipping.`);
+              return;
+            }
+            if (pr.base.ref !== 'main') {
+              console.log(`PR #${prNumber} base is '${pr.base.ref}', not 'main'; skipping.`);
+              return;
+            }
+            if (pr.draft) {
+              console.log(`PR #${prNumber} is a draft; skipping until ready_for_review.`);
+              return;
+            }
+            if (pr.head.repo.owner.login !== owner ||
+                pr.head.repo.name !== repo) {
+              console.log(`PR #${prNumber} comes from a fork; skipping (only same-repo PRs).`);
+              return;
+            }
+            if (pr.merged_at) {
+              console.log(`PR #${prNumber} already merged; skipping.`);
+              return;
+            }
+
+            const isManual = context.eventName === 'workflow_dispatch';
+            const comments = await github.rest.issues.listComments({
+              owner, repo, issue_number: prNumber, per_page: 100
+            }).then(r => r.data);
+            const marker = `**DoD review @ ${pr.head.sha}**`;
+            if (!isManual) {
+              if (comments.some(c => c.body && c.body.includes(marker))) {
+                console.log(`PR #${prNumber} already reviewed at head ${pr.head.sha}; skipping.`);
+                return;
+              }
+            }
+
+            core.setOutput('pr_number', String(prNumber));
+            core.setOutput('head_ref', pr.head.ref);
+            core.setOutput('proceed', 'true');
+        env:
+          PR_INPUT: ${{ inputs.pr_number || '' }}
+
+  review:
+    needs: guard
+    if: needs.guard.outputs.proceed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout head of the PR
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ needs.guard.outputs.head_ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Run OpenCode review
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ needs.guard.outputs.pr_number }}
+          OPENCODE_PERMISSION: '{"read":{"*":"allow","*.env":"deny","*.env.*":"deny","*.env.example":"allow"},"glob":{"*":"allow"},"grep":{"*":"allow"},"edit":{"*":"allow"},"bash":{"*":"deny","git *":"allow","gh *":"allow","python *":"allow","pip *":"allow"},"external_directory":{"/tmp/**":"allow","~/.opencode/**":"allow"},"webfetch":{"*":"deny"},"websearch":{"*":"deny"},"task":{"*":"deny"},"question":"deny","doom_loop":"deny"}'
+        with:
+          model: opencode/big-pickle
+          prompt: |
+            You are the autonomous PR reviewer and merges PRs when the project's
+            Definition of Done (DoD) is met. Read docs/definition-of-done.md first
+            and follow it exactly. The PR to review is #${PR_NUMBER} (in the
+            env var PR_NUMBER). You are already on the PR head branch.
+
+            Procedure:
+            1. Gather reality from GitHub with `gh` (GH_TOKEN is set):
+               - gh pr view ${PR_NUMBER} --json number,title,baseRefName,headRefName,mergeable,state,body
+               - Find the linked issue (body contains "Closes #N" or "Fixes #N").
+               - gh issue view N --comments to read the issue and its evidence.
+            2. Verify the FIVE DoD points against the issue evidence and the
+               real repo/CI state:
+               1. Implementation matches issue scope (check diff against issue).
+               2. Integration on the agreed branch with no pending conflicts
+                  (baseRefName must be 'main').
+               3. Technical verification executed (the `test` check must be
+                  green — see CI step below).
+               4. Evidence registered on the issue: the comment checklist from
+                  docs/definition-of-done.md is present, all boxes checked, with
+                  real links to commits/PR and a validation result.
+               5. Associated documentation updated (README, docs/, ADRs,
+                  AGENTS.md) OR explicitly declared "no aplica" in the evidence.
+               If ANY point is missing or unverifiable, do NOT change anything:
+               write a comment on the PR starting with the line
+               **DoD review @ <current head sha>** listing what fails and the
+               concrete solution for each, and stop.
+            3. Bring main over the branch to guarantee a conflict-free merge:
+               git fetch origin main
+               git merge origin/main --no-ff -m "Merge main into <head> (DoD review)"
+               If conflicts arise, resolve them INTEGRATING BOTH SIDES — never
+               discard whole files that exist on main, never delete work done by
+               other issues. Commit the resolution continuing the same merge.
+            4. Push the merge commit to the PR branch. If there was nothing to
+               merge (main already an ancestor of head), skip pushing.
+            5. Wait for CI to be green on the final head before merging:
+               gh pr checks ${PR_NUMBER} --watch --interval 15 --fail-fast
+               You must confirm the `test` check is SUCCESS on the final head
+               commit. If the merged state is red or you cannot resolve the
+               conflicts, comment the failures + solutions and do NOT merge.
+            6. If all DoD points pass and CI is green on the final head, merge:
+               gh pr merge ${PR_NUMBER} --merge --delete-branch
+               Then post a comment on the PR:
+               **DoD review @ <final head sha>** — DoD OK. Merged.
+            7. NEVER force-push, NEVER merge a red CI, NEVER swallow conflicts
+               by deleting files, NEVER touch issues/labels of other work. If
+               you cannot verify something, comment instead of merging.
+
+            Use `gh` for all GitHub interactions. Report concisely at the end
+            (veredicto final y acciones tomadas); the merge is done by you only
+            when the DoD is fully met.

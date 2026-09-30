@@ -26,7 +26,13 @@ def fake_redis(monkeypatch):
 
 @pytest.fixture
 def stub_nodes(monkeypatch):
-    async def fake_plan(goal: str, model: str | None = None) -> list[str]:
+    records: dict = {}
+
+    async def fake_plan(
+        goal: str, model: str | None = None, memory: str | None = None
+    ) -> list[str]:
+        records["goal"] = goal
+        records["memory"] = memory
         return ["Subtarea A", "Subtarea B"]
 
     async def fake_search(query: str, max_results: int = 5) -> list[str]:
@@ -38,6 +44,7 @@ def stub_nodes(monkeypatch):
     monkeypatch.setattr(nodes, "plan_subtasks", fake_plan)
     monkeypatch.setattr(nodes, "run_search", fake_search)
     monkeypatch.setattr(nodes, "chat", fake_chat)
+    return records
 
 
 @pytest.mark.asyncio
@@ -69,7 +76,7 @@ async def test_pipeline_publishes_and_synthesizes(fake_redis, stub_nodes):
 async def test_plan_fallback_to_single_subtask(fake_redis, monkeypatch):
     from backend.orchestrator.graph import build_graph
 
-    async def fake_subtasks(goal: str, model: str | None = None) -> list[str]:
+    async def fake_subtasks(goal: str, model: str | None = None, memory: str | None = None) -> list[str]:
         return [goal]
 
     monkeypatch.setattr(nodes, "plan_subtasks", fake_subtasks)
@@ -94,3 +101,70 @@ async def _async_list(items):
 
 async def _async_str(value: str) -> str:
     return value
+
+
+@pytest.mark.asyncio
+async def test_planner_loads_memory_and_synthesize_stores_it(
+    fake_redis, stub_nodes, monkeypatch
+):
+    from backend.orchestrator import graph
+
+    captured: dict = {}
+
+    async def fake_memory_load(user_id: str | None) -> str | None:
+        captured["loaded_for"] = user_id
+        return "resumen de la conversación anterior"
+
+    async def fake_memory_store(user_id: str | None, goal: str, analysis: str) -> None:
+        captured["stored"] = (user_id, goal, analysis)
+
+    monkeypatch.setattr(graph, "_load_memory", fake_memory_load)
+    monkeypatch.setattr(graph, "_store_memory", fake_memory_store)
+
+    g = graph.build_graph()
+    state = await g.ainvoke(
+        {
+            "task_id": "t3",
+            "goal": "Objetivo con memoria",
+            "user_id": "usuario-42",
+            "results": [],
+            "progress": [],
+        }
+    )
+
+    assert stub_nodes["memory"] == "resumen de la conversación anterior"
+    assert captured["loaded_for"] == "usuario-42"
+    assert captured["stored"] == ("usuario-42", "Objetivo con memoria", state["analysis"])
+
+
+@pytest.mark.asyncio
+async def test_planner_skips_memory_without_user_id(fake_redis, stub_nodes, monkeypatch):
+    from backend.orchestrator import graph
+
+    async def fake_memory_load(user_id: str | None) -> str | None:
+        raise AssertionError("no debe cargar memoria sin user_id")
+
+    monkeypatch.setattr(graph, "_load_memory", fake_memory_load)
+
+    g = graph.build_graph()
+    state = await g.ainvoke(
+        {"task_id": "t4", "goal": "Objetivo anónimo", "results": [], "progress": []}
+    )
+    assert state["analysis"].startswith("Resumen de:")
+    assert stub_nodes["memory"] is None
+
+
+@pytest.mark.asyncio
+async def test_plan_subtasks_embeds_memory_context(fake_redis, monkeypatch):
+    from backend.orchestrator import nodes
+
+    captured: dict = {}
+
+    async def fake_chat(text: str, system: str, model: str | None = None) -> str:
+        captured["text"] = text
+        return '{"subtasks": ["A"]}'
+
+    monkeypatch.setattr(nodes, "chat", fake_chat)
+    subtasks = await nodes.plan_subtasks("Investigar X", memory="el usuario ya vio Y")
+    assert subtasks == ["A"]
+    assert "Contexto de conversaciones previas del usuario: el usuario ya vio Y" in captured["text"]

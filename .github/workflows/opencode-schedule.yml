@@ -47,6 +47,7 @@ jobs:
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENCODE_PERMISSION: '{"bash":{"*":"deny","git *":"allow","gh *":"allow","python *":"allow","pip *":"allow","graphify *":"allow"},"external_directory":{"/tmp/**":"allow","~/.opencode/**":"allow"},"question":"deny","doom_loop":"deny"}'
           PROMPT: |
             Process the oldest open issue labeled `agent-ready` that has no open
             pull request and no `agent-in-progress` label. Use the `gh` CLI
@@ -58,7 +59,13 @@ jobs:
             3. Install dependencies (pip install -r backend/requirements.txt),
                run `python -m pytest -q` and do not finish until green. Add tests
                for the new behavior.
-            4. If the issue cannot be implemented (unclear or blocked), swap the
+            4. Before finishing, read docs/definition-of-done.md and post a
+               comment on the issue with the structured evidence checklist it
+               defines ("## Evidencias DoD"): what was done, commits, PR number,
+               validation result, and documentation updated (or "no aplica").
+               Every box must be checked with real links, because the autonomous
+               reviewer will only merge the PR when the DoD is met.
+            5. If the issue cannot be implemented (unclear or blocked), swap the
                labels back to `agent-ready` and leave a comment explaining why.
 
             Report a summary of what you did in your response; branch creation,

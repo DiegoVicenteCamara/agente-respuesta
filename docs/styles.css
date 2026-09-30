@@ -1,0 +1,19 @@
+:root { color-scheme: light dark; --max: 62rem; --accent: #0b6e4f; }
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; line-height: 1.6; color: CanvasText; background: Canvas; }
+header.hero, main, footer { max-width: var(--max); margin: 0 auto; padding: 1.5rem 1.25rem; }
+.kicker { text-transform: uppercase; letter-spacing: .06em; font-size: .8rem; opacity: .8; }
+h1 { line-height: 1.2; margin: .25rem 0 1rem; }
+.pitch { font-size: 1.1rem; }
+.cta { display: flex; gap: .75rem; flex-wrap: wrap; margin: 1rem 0; }
+.btn { display: inline-block; padding: .6rem 1.1rem; border-radius: .6rem; background: var(--accent); color: #fff; text-decoration: none; font-weight: 600; }
+.btn.ghost { background: transparent; color: inherit; border: 2px solid var(--accent); }
+.note { font-size: .95rem; opacity: .9; border-left: 4px solid var(--accent); padding-left: .75rem; }
+section { margin-top: 2.5rem; border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent); padding-top: 1.5rem; }
+pre { overflow-x: auto; padding: 1rem; border-radius: .6rem; background: color-mix(in srgb, currentColor 7%, transparent); }
+pre.diagram { font-size: .85rem; }
+table.stack { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+table.stack caption { text-align: left; font-weight: 700; margin-bottom: .5rem; }
+table.stack th, table.stack td { border: 1px solid color-mix(in srgb, currentColor 25%, transparent); padding: .5rem .6rem; text-align: left; vertical-align: top; }
+footer { font-size: .9rem; opacity: .9; }
+@media (max-width: 40rem) { pre.diagram { font-size: .72rem; } }

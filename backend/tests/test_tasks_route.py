@@ -94,13 +94,28 @@ def test_orchestrator_task_uses_policy_model(
     patch_route(_decision(RouteAction.ORCHESTRATOR, model=ADVANCED_MODEL))
     recorded: dict = {}
 
-    def fake_run_graph(task_id: str, goal: str, planner_model: str | None) -> str:
-        recorded.update(task_id=task_id, goal=goal, planner_model=planner_model)
+    def fake_run_graph(task_id: str, goal: str, planner_model: str | None, user_id: str | None) -> str:
+        recorded.update(task_id=task_id, goal=goal, planner_model=planner_model, user_id=user_id)
         return "informe final"
 
     monkeypatch.setattr(tasks, "_run_graph", fake_run_graph)
     assert tasks.run_pipeline("t-orch", "Investiga el mercado") == "informe final"
-    assert recorded == {"task_id": "t-orch", "goal": "Investiga el mercado", "planner_model": ADVANCED_MODEL}
+    assert recorded == {"task_id": "t-orch", "goal": "Investiga el mercado", "planner_model": ADVANCED_MODEL, "user_id": None}
+
+
+def test_run_pipeline_passes_user_id_to_orchestrator(
+    fake_redis, patch_route, monkeypatch
+):
+    patch_route(_decision(RouteAction.ORCHESTRATOR, model=ADVANCED_MODEL))
+    recorded: dict = {}
+
+    def fake_run_graph(task_id: str, goal: str, planner_model: str | None, user_id: str | None) -> str:
+        recorded["user_id"] = user_id
+        return "informe final"
+
+    monkeypatch.setattr(tasks, "_run_graph", fake_run_graph)
+    tasks.run_pipeline("t-orch", "Investiga el mercado", user_id="usuario-42")
+    assert recorded["user_id"] == "usuario-42"
 
 
 def test_propose_commit_in_executor_is_committed_with_advanced_model(
@@ -110,10 +125,12 @@ def test_propose_commit_in_executor_is_committed_with_advanced_model(
     patch_route(_decision(RouteAction.PROPOSE_COMMIT, model=ADVANCED_MODEL))
     recorded: dict = {}
 
-    def fake_run_graph(task_id: str, goal: str, planner_model: str | None) -> str:
+    def fake_run_graph(task_id: str, goal: str, planner_model: str | None, user_id: str | None) -> str:
         recorded["planner_model"] = planner_model
+        recorded["user_id"] = user_id
         return "ok"
 
     monkeypatch.setattr(tasks, "_run_graph", fake_run_graph)
-    assert tasks.run_pipeline("t-commit", "Cierra todas las sesiones") == "ok"
+    assert tasks.run_pipeline("t-commit", "Cierra todas las sesiones", user_id="usuario-7") == "ok"
     assert recorded["planner_model"] == ADVANCED_MODEL
+    assert recorded["user_id"] == "usuario-7"

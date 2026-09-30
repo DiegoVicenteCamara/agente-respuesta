@@ -20,8 +20,16 @@ def test_token_endpoint(monkeypatch):
     body = resp.json()
     assert body["wsUrl"] == "wss://dev.livekit.cloud"
     assert body["room"] == "prueba"
-    assert body["identity"].startswith("user-")
+    assert body["identity"].startswith("participant-")
     assert body["token"].count(".") == 2
+
+
+def test_token_returns_provided_identity(monkeypatch):
+    monkeypatch.setattr(main, "settings", _dummy_settings())
+    client = TestClient(main.app)
+    resp = client.get("/token?room=prueba&identity=alice")
+    assert resp.status_code == 200
+    assert resp.json()["identity"] == "alice"
 
 
 def test_token_requires_credentials(monkeypatch):

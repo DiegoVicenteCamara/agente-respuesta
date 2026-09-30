@@ -1,0 +1,125 @@
+name: opencode-issues
+
+on:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+    inputs:
+      category:
+        description: "Categoría de issues a generar (all genera 4-6 por categorías)"
+        type: choice
+        required: false
+        default: all
+        options:
+          - all
+          - feature
+          - security
+          - ux-ui
+          - docs
+          - workflows
+      count:
+        description: "Número total de issues a crear (default 5, rango 4-6)"
+        type: number
+        required: false
+        default: 5
+
+env:
+  OPENCODE_VERSION: v1.18.32
+  MODEL: opencode/big-pickle
+  CATEGORY: ${{ inputs.category || 'all' }}
+  COUNT: ${{ inputs.count || '5' }}
+
+jobs:
+  generate-issues:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: opencode-issues
+      cancel-in-progress: false
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Cache opencode
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.opencode/bin
+          key: opencode-${{ runner.os }}-${{ runner.arch }}-${{ env.OPENCODE_VERSION }}
+
+      - name: Install opencode
+        if: steps.cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: curl -fsSL https://opencode.ai/install | bash -s -- --version ${{ env.OPENCODE_VERSION }}
+
+      - name: Add opencode to PATH
+        shell: bash
+        run: echo "$HOME/.opencode/bin" >> $GITHUB_PATH
+
+      - name: Run opencode (generate issues)
+        shell: bash
+        run: opencode github run
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENCODE_PERMISSION: '{"bash":{"*":"deny","gh *":"allow"},"question":"deny","doom_loop":"deny"}'
+          PROMPT: |
+            You are the ISSUE GENERATOR of this repository. Your ONLY job is to
+            create NEW GitHub issues (proposals). You must NOT modify code, commit,
+            push, create branches or PRs. `gh` is your only allowed shell command.
+
+            Context: this repo is a voice AI agent (LiveKit + OpenAI Realtime,
+            LangGraph/Celery/Redis, FastAPI web) with autonomous opencode workflows
+            (.github/workflows/opencode-{label,schedule,review}.yml) that implement
+            issues labeled `agent-ready` and review/merge PRs against
+            docs/definition-of-done.md.
+
+            1. Ground truth first: read AGENTS.md, README.md (section "Implementación
+               autónoma"), docs/decisions/, docs/definition-of-done.md, and list open
+               issues (`gh issue list --state open --json number,title,labels`) plus
+               `gh issue search "feat:" --state open`. Never duplicate an existing
+               open issue (skip or merge into an existing one if a close match exists).
+            2. Generate ${COUNT} issues minimum in the ${CATEGORY} category when a
+               specific category is given; when 'all', generate 4-6 issues covering:
+               - one FEATURE (new capability or meaningful enhancement for the voice
+                 agent: voice, orchestration, web, cost, memory, telephony, UX of the
+                 assistant itself),
+               - one SECURITY / repo-protection item (secrets hygiene, branch
+                 protection, hardening of the opencode permission policies, audit),
+               - one UX/UI improvement of the local web panel (web/index.html +
+                 backend/api),
+               - one DOCUMENTATION improvement (README, docs/, ADR coverage, landing),
+               - up to one idea for a NEW WORKFLOW or automation that improves the
+                 project (CI/CD, skills, tooling).
+            3. Ground every proposal in the actual repository structure and stack.
+               Each issue must be small enough to be implemented by the autonomous
+               pipeline: prefer concrete, falsifiable proposals over generic ideas.
+            4. Issue format (follow the installed repo convention):
+               - Title: `feat: <verbo en infinitivo> ...` (or `security:` / `docs:` /
+                 `workflow:` headers where appropriate).
+               - Body with sections: ## Contexto, ## Feature, ## Diseño corto
+                 (classify with the brainstorming skill: spike / bounded /
+                 architectural), ## Criterios de éxito. If architectural, note that
+                 an ADR in docs/decisions/ is required before implementing.
+               - Labels: 'enhancement' + one category label. For FEATURE issues ONLY
+                 also add 'agent-ready' (so the autonomous pipeline picks them up).
+                 Security, ux-ui, documentation and workflow issues stay in human
+                 triage (NO 'agent-ready'). Ensure labels exist before creating:
+                 `gh label create ux-ui --force --description "UI/UX del panel web"`;
+                 `gh label create security --force --description "Seguridad, secretos y protección de ramas"`;
+                 `gh label create workflows --force --description "Automatización y workflows del proyecto"`.
+                 'enhancement', 'documentation' and 'agent-ready' already exist.
+            5. Create each issue with:
+               `gh issue create --title "..." --label enhancement,<category> --body-file /tmp/<slug>.md`
+               (write the body to a temp file first; --label accepts a comma-separated
+               list; add 'agent-ready' only for features).
+            6. Never run git/pip/python/edit commands; never open PRs; never touch
+               existing issues. Never reveal or print secrets.
+
+            Report concisely at the end: bullet list of created issues with their
+            URLs and labels, plus any skipped duplicates. Exit successfully even if
+            only some categories produced valid proposals; never create filler
+            issues just to reach the count if nothing grounded is found.

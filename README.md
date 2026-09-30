@@ -1,5 +1,8 @@
 # Respuesta — Agente de voz con subagentes proactivos
 
+[![Sitio público](https://img.shields.io/badge/sitio-GitHub%20Pages-blue)](https://diegovicentecamara.github.io/agente-respuesta/)
+> **Sitio público (landing):** https://diegovicentecamara.github.io/agente-respuesta/ — pitch, arquitectura, quickstart y docs. La landing enlaza aquí y viceversa (ver [ADR-004](docs/decisions/ADR-004-landing-page-en-github-pages-desde-docs-con-deploy-por-actions.md)).
+
 Un agente de IA que funciona como si estuvieras en una llamada con una persona:
 recibes una llamada desde tu navegador, le pides una tarea compleja (investigar,
 resumir, comparar…) y un **orquestador la descompone y delega a subagentes en
@@ -164,7 +167,8 @@ web/index.html             # Cliente del navegador (livekit-client)
 
 Los issues del repo marcos con la label **`agent-ready`** son implementados de
 forma autónoma por un agente opencode y devueltos como un Pull Request listo
-para revisión. Ver `docs/decisions/ADR-003-...` para el diseño completo.
+para revisión. Ver `docs/decisions/ADR-003-...` y
+`docs/decisions/ADR-005-...` para el diseño completo.
 
 - **`agent-ready`** → el workflow `opencode-label` se dispara y el agente
   implementa el issue (rama `opencode/issue<N>-<ts>` + PR con `Closes #N`).
@@ -172,13 +176,36 @@ para revisión. Ver `docs/decisions/ADR-003-...` para el diseño completo.
   más antiguo sin PR abierto, 1 por run.
 - **CI** (`test`) → corre `pytest` en cada PR y push a `main`; check obligatorio
   de branch protection. El agente debe dejar la suite verde antes de abrir el PR.
+- **Revisión y merge automático** (`opencode-review`) → un agente revisor
+  comprueba la Definición de Hecho del proyecto (`docs/definition-of-done.md`),
+  trae `main` sobre la rama resolviendo conflictos en verde y, si todo cumple,
+  mergea la PR automáticamente. Si algo no cumple, comenta en la PR qué falla y
+  qué soluciones y deja la PR abierta sin mergear.
 - Labels: `agent-ready` → `agent-in-progress` mientras trabaja; si falla, se
   restaura `agent-ready`.
+
+### Generación de issues (`opencode-issues`)
+
+El workflow `opencode-issues` propone **issues nuevas automáticamente**: un agente
+opencode (modelo `opencode/big-pickle`, autenticado con el secreto
+`OPENCODE_API_KEY`) crea entre 4-6 candidatas por ejecución — features, seguridad /
+protección de ramas, UX/UI del panel web, documentación e ideas de nuevas
+automatizaciones — siguiendo el formato de issue del repo y evitando duplicados.
+Ver `docs/decisions/ADR-006-...` para el diseño completo.
+
+- **Cadencia**: semanal (lunes 08:00 UTC) + manual vía `workflow_dispatch`
+  (inputs `category` y `count`) desde la pestaña *Actions*.
+- **Triage**: las **features** (`enhancement`) se etiquetan además con
+  `agent-ready` y entran solas en el pipeline de implementación. Seguridad,
+  UX/UI, documentación y workflows quedan solo con su label de categoría
+  (`security`, `ux-ui`, `workflows`) esperando aprobación humana.
+- El agente generador **no puede** tocar código ni ramas (permisos de solo lectura
+  + `gh`); únicamente crea issues.
 
 Setup (una vez): instalar la GitHub App `opencode-agent` en el repo, crear el
 secret `OPENCODE_API_KEY` (suscripción opencode Zen/Go) y los labels
 `agent-ready` / `agent-in-progress`; activar branch protection en `main`
-(exigir PR, check `test` y 1 review).
+(exigir PR y check `test`; el review lo realiza el agente revisor).
 
 ## Siguiente paso natural
 
