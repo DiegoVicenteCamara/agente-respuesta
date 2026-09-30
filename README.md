@@ -184,6 +184,24 @@ para revisión. Ver `docs/decisions/ADR-003-...` y
 - Labels: `agent-ready` → `agent-in-progress` mientras trabaja; si falla, se
   restaura `agent-ready`.
 
+### Generación de issues (`opencode-issues`)
+
+El workflow `opencode-issues` propone **issues nuevas automáticamente**: un agente
+opencode (modelo `opencode/big-pickle`, autenticado con el secreto
+`OPENCODE_API_KEY`) crea entre 4-6 candidatas por ejecución — features, seguridad /
+protección de ramas, UX/UI del panel web, documentación e ideas de nuevas
+automatizaciones — siguiendo el formato de issue del repo y evitando duplicados.
+Ver `docs/decisions/ADR-006-...` para el diseño completo.
+
+- **Cadencia**: semanal (lunes 08:00 UTC) + manual vía `workflow_dispatch`
+  (inputs `category` y `count`) desde la pestaña *Actions*.
+- **Triage**: las **features** (`enhancement`) se etiquetan además con
+  `agent-ready` y entran solas en el pipeline de implementación. Seguridad,
+  UX/UI, documentación y workflows quedan solo con su label de categoría
+  (`security`, `ux-ui`, `workflows`) esperando aprobación humana.
+- El agente generador **no puede** tocar código ni ramas (permisos de solo lectura
+  + `gh`); únicamente crea issues.
+
 Setup (una vez): instalar la GitHub App `opencode-agent` en el repo, crear el
 secret `OPENCODE_API_KEY` (suscripción opencode Zen/Go) y los labels
 `agent-ready` / `agent-in-progress`; activar branch protection en `main`
