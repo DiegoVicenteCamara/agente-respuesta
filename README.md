@@ -1,5 +1,8 @@
 # Respuesta — Agente de voz con subagentes proactivos
 
+[![test](https://github.com/DiegoVicenteCamara/agente-respuesta/actions/workflows/test.yml/badge.svg)](https://github.com/DiegoVicenteCamara/agente-respuesta/actions/workflows/test.yml)
+[![pages](https://github.com/DiegoVicenteCamara/agente-respuesta/actions/workflows/pages.yml/badge.svg)](https://diegovicentecamara.github.io/agente-respuesta/)
+[![license: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Sitio público](https://img.shields.io/badge/sitio-GitHub%20Pages-blue)](https://diegovicentecamara.github.io/agente-respuesta/)
 > **Sitio público (landing):** https://diegovicentecamara.github.io/agente-respuesta/ — pitch, arquitectura, quickstart y docs. La landing enlaza aquí y viceversa (ver [ADR-004](docs/decisions/ADR-004-landing-page-en-github-pages-desde-docs-con-deploy-por-actions.md)).
 

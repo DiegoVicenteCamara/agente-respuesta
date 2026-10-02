@@ -1,0 +1,51 @@
+name: Feature (agent-ready)
+description: Propuesta de funcionalidad lista para el pipeline autónomo opencode.
+title: "feat: <verbo en infinitivo> ..."
+labels: [enhancement, agent-ready]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Las features con `agent-ready` las implementa el agente opencode en CI
+        (rama `opencode/issue<N>-<ts>` + PR con `Closes #N`). Seguridad, UX/UI,
+        docs y workflows quedan en triaje humano (sin `agent-ready`).
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: ¿Qué problema resuelve y por qué ahora?
+      placeholder: Contexto y motivación...
+    validations:
+      required: true
+  - type: textarea
+    id: feature
+    attributes:
+      label: Feature / Alcance
+      description: Qué se propone, con pasos numerados si aplica.
+      placeholder: "1. ...\n2. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: diseno
+    attributes:
+      label: Diseño corto
+      description: Clasificación brainstorming (spike / bounded / architectural) y ficheros que toca. Si es architectural, indica que requiere ADR en docs/decisions/.
+      placeholder: "Clasificación: bounded. Toca backend/... No toca ..."
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Criterios de éxito
+      description: Condiciones falsables que debe cumplir la PR.
+      placeholder: "- [ ] ...\n- [ ] `python -m pytest -q` en verde"
+    validations:
+      required: true
+  - type: textarea
+    id: delegacion
+    attributes:
+      label: Prompt de delegación (opcional)
+      description: Instrucción literal que el agente autónomo debe seguir, si difiere del flujo estándar de AGENTS.md.
+      placeholder: Seguir AGENTS.md; ...
+    validations:
+      required: false
