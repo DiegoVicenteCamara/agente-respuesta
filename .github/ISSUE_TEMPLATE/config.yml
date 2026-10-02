@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Pregunta / discusión
+    url: https://github.com/DiegoVicenteCamara/agente-respuesta/discussions
+    about: Usa las discusiones para preguntas y propuestas abiertas.
+  - name: Reporte privado de seguridad
+    url: https://github.com/DiegoVicenteCamara/agente-respuesta/blob/main/SECURITY.md
+    about: No abras issues públicos con vulnerabilidades o secretos; sigue SECURITY.md.

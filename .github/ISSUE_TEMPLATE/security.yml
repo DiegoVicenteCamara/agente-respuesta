@@ -1,0 +1,24 @@
+name: Seguridad / secreto
+description: Higiene de secretos, protección de ramas o hardening (triaje humano, sin agent-ready).
+title: "security: ..."
+labels: [security]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: Riesgo o hallazgo. Si incluye un secreto real, NO lo pegues: rota la clave y describe dónde estaba sin revelar el valor.
+    validations:
+      required: true
+  - type: textarea
+    id: alcance
+    attributes:
+      label: Alcance propuesto
+    validations:
+      required: true
+  - type: textarea
+    id: exito
+    attributes:
+      label: Criterios de éxito
+    validations:
+      required: true

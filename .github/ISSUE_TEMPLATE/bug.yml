@@ -1,0 +1,26 @@
+name: Bug
+description: Comportamiento inesperado o fallo.
+title: "fix: ..."
+labels: [bug]
+body:
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: Qué esperabas y qué ocurrió.
+    validations:
+      required: true
+  - type: textarea
+    id: reproducir
+    attributes:
+      label: Pasos para reproducir
+      placeholder: "1. ...\n2. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: exito
+    attributes:
+      label: Criterios de éxito
+      placeholder: "- [ ] ...\n- [ ] `python -m pytest -q` en verde"
+    validations:
+      required: true
