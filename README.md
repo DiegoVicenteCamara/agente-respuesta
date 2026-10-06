@@ -162,6 +162,11 @@ web/index.html             # Cliente del navegador (livekit-client)
 - **`priority: info`** → habla con prefacio cortés *«Disculpa que te
   interrumpa…»* respetando el barge-in (`allow_interruptions=True`).
 - **`priority: urgent`** → *«Necesito tu atención…»*.
+- **Ráfagas `info`** → se agrupan en **una sola intervención** dentro de la
+  ventana `NOTIFY_AGGR_WINDOW_MS` (por defecto 2500 ms):
+  *«…tengo 3 avances: …»*. El earcon suena una sola vez por intervención
+  agrupada. Los `urgent` interrumpen de inmediato y vacían el lote
+  pendiente (primero el urgente, justo después el lote, sin perderse).
 
 ## Implementación autónoma de issues (opencode en CI)
 

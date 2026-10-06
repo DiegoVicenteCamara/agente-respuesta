@@ -18,8 +18,8 @@ from livekit.plugins import openai
 from backend.bus import redis_client
 from backend.config import settings
 from backend.memory import service as memory_service
-from backend.voice import notifier
 from backend.voice import tools
+from backend.voice.aggregator import UpdateAggregator
 from backend.voice.earcon import play_earcon
 from backend.voice.tools import cancel_task, confirm_execution, delegate_complex_task
 
@@ -98,31 +98,103 @@ def build_welcome_instructions(memory: str | None = None) -> str:
     return WELCOME_INSTRUCTIONS
 
 
-async def _listen_for_updates(session: AgentSession) -> None:
-    """Escucha eventos de los subagentes y habla proactivamente."""
+async def _speak(session: AgentSession, payload: dict, text: str) -> None:
+    """Emite una intervención hablada con su earcon (una vez por llamada)."""
+    logger.info("Notificación por voz: %s", text)
+    try:
+        await play_earcon(session, payload)
+        await session.generate_reply(instructions=text, allow_interruptions=True)
+    except Exception:  # noqa: BLE001
+        logger.exception("Fallo al inyectar la actualización por voz")
+
+
+async def _listen_for_updates(session: AgentSession, window_ms: int | None = None) -> None:
+    """Escucha eventos de los subagentes y habla proactivamente.
+
+    Agrupa los ``info`` en ráfaga en una sola intervención (issue #47):
+    los ``info`` se acumulan durante ``window_ms`` (por defecto
+    ``NOTIFY_AGGR_WINDOW_MS``) y se hablan juntos; los ``silent`` nunca
+    hablan; los ``urgent`` interrumpen de inmediato vaciando el lote
+    pendiente (primero el urgente, justo después el lote, sin perderse).
+    El earcon suena una sola vez por cada ``generate_reply``.
+
+    ``window_ms`` es punto de inyección para tests.
+    """
+    if window_ms is None:
+        window_ms = int(getattr(settings, "notify_aggr_window_ms", 2500))
+    window_s = window_ms / 1000.0 if window_ms and window_ms > 0 else 0
     client = redis_client.get_async()
     pubsub = client.pubsub()
     await pubsub.subscribe(settings.event_channel)
     logger.info("Escuchando actualizaciones en el canal %s", settings.event_channel)
-    async for message in pubsub.listen():
-        if message.get("type") != "message":
-            continue
+    aggregator = UpdateAggregator()
+    info_placeholder: dict = {"priority": "info"}
+    pending_earcon: dict | None = None
+
+    async def _flush_pending() -> None:
+        nonlocal pending_earcon
+        pending = aggregator.flush()
+        if pending:
+            await _speak(session, pending_earcon or info_placeholder, pending)
+            pending_earcon = None
+
+    # Bomba pub/sub -> cola: el timeout sobre ``queue.get()`` es cancelable
+    # sin corromper el generador de Redis (``wait_for(__anext__)`` lo
+    # cancelaría y perdería eventos, ver test_flush_by_timeout).
+    queue: asyncio.Queue = asyncio.Queue()
+    sentinel = object()
+
+    async def _pump() -> None:
         try:
-            payload = json.loads(message["data"])
-        except (json.JSONDecodeError, TypeError):
-            continue
-        try:
-            text = notifier.build_spoken_update(payload)
-        except (TypeError, AttributeError):
-            text = None
-        if not text:
-            continue
-        logger.info("Notificación por voz: %s", text)
-        try:
-            await play_earcon(session, payload)
-            await session.generate_reply(instructions=text, allow_interruptions=True)
+            async for message in pubsub.listen():
+                await queue.put(message)
         except Exception:  # noqa: BLE001
-            logger.exception("Fallo al inyectar la actualización por voz")
+            logger.exception("Fallo bombeando eventos de voz")
+        finally:
+            await queue.put(sentinel)
+
+    pump = asyncio.ensure_future(_pump())
+    try:
+        while True:
+            try:
+                if window_s > 0:
+                    message = await asyncio.wait_for(queue.get(), timeout=window_s)
+                else:
+                    message = await queue.get()
+            except asyncio.TimeoutError:
+                await _flush_pending()
+                continue
+            if message is sentinel:
+                await _flush_pending()
+                break
+            if message.get("type") != "message":
+                continue
+            try:
+                payload = json.loads(message["data"])
+            except (json.JSONDecodeError, TypeError):
+                continue
+            pending_before = aggregator.pending_count
+            earcon_before = pending_earcon
+            try:
+                texts = aggregator.add(payload)
+            except (TypeError, AttributeError):
+                continue
+            if not texts:
+                # Se acumuló un info: conserva el primer payload para el earcon.
+                if aggregator.pending_count > pending_before and pending_earcon is None:
+                    pending_earcon = payload
+                continue
+            if len(texts) == 1:
+                await _speak(session, payload, texts[0])
+            else:
+                # Urgente + lote pendiente: urgente primero, lote justo después.
+                await _speak(session, payload, texts[0])
+                for extra in texts[1:]:
+                    await _speak(session, earcon_before or info_placeholder, extra)
+                pending_earcon = None
+    finally:
+        if not pump.done():
+            pump.cancel()
 
 
 server = AgentServer()

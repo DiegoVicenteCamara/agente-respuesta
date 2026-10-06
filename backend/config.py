@@ -56,6 +56,7 @@ class Settings:
             "",
         )
         self.earcon_path: str = _get("EARCON_PATH", "")
+        self.notify_aggr_window_ms: int = int(_get("NOTIFY_AGGR_WINDOW_MS", "2500"))
 
     def _load_pricing(self) -> dict[str, tuple[float, float]]:
         defaults = {
