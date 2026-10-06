@@ -121,6 +121,8 @@ async def test_task_cancelled_and_empty_messages_are_silent(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_mixed_sequence_only_speaks_audible_in_order(monkeypatch):
+    # Issue #47: el urgent vacía el lote pendiente (urgente primero,
+    # lote justo después, sin perderse).
     session, _, task = _run_listen(
         monkeypatch,
         [
@@ -132,8 +134,8 @@ async def test_mixed_sequence_only_speaks_audible_in_order(monkeypatch):
     )
     await asyncio.wait_for(task, timeout=2)
     assert session.replies == [
-        "Disculpa que te interrumpa, avance uno",
         "Necesito tu atención. decide ya",
+        "Disculpa que te interrumpa, avance uno",
     ]
 
 
@@ -154,6 +156,8 @@ async def test_invalid_frames_are_ignored(monkeypatch):
 
 @pytest.mark.asyncio
 async def test_reply_failure_does_not_kill_listener(monkeypatch):
+    # Issue #47: el urgent habla primero; falla la 1ª (urgent) y el lote
+    # info pendiente se sigue anunciando después.
     session = FakeSession(fail_on={1})
     session, _, task = _run_listen(
         monkeypatch,
@@ -164,4 +168,4 @@ async def test_reply_failure_does_not_kill_listener(monkeypatch):
         session=session,
     )
     await asyncio.wait_for(task, timeout=2)
-    assert session.replies == ["Necesito tu atención. segundo"]
+    assert session.replies == ["Disculpa que te interrumpa, primero"]
