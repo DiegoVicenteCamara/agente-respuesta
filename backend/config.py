@@ -56,6 +56,12 @@ class Settings:
             "",
         )
         self.earcon_path: str = _get("EARCON_PATH", "")
+        self.rate_limit_token_per_min: int = int(
+            _get("RATE_LIMIT_TOKEN_PER_MIN", "30")
+        )
+        self.rate_limit_debug_per_min: int = int(
+            _get("RATE_LIMIT_DEBUG_PER_MIN", "10")
+        )
 
     def _load_pricing(self) -> dict[str, tuple[float, float]]:
         defaults = {

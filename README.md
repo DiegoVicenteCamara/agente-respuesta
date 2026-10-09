@@ -63,6 +63,17 @@ python3 -m venv .venv
 
 > Nota: probado con Python 3.14. Si algún wheel fallara, usa Python 3.12/3.13.
 
+### Rate-limit de endpoints sensibles (issue #48)
+
+`GET /token` y `POST /debug/run` están limitados por IP con ventana fija en
+memoria (sin dependencias nuevas). Al superar el límite responden `429` con
+cabecera `Retry-After`, y el panel muestra "Demasiadas peticiones, espera X s".
+
+| Variable | Default | Qué controla |
+|---|---|---|
+| `RATE_LIMIT_TOKEN_PER_MIN` | `30` | Peticiones/min por IP a `GET /token` |
+| `RATE_LIMIT_DEBUG_PER_MIN` | `10` | Peticiones/min por IP a `POST /debug/run` (el excedente no encola trabajo en Celery) |
+
 ## Ejecución (4 terminales)
 
 ```bash
