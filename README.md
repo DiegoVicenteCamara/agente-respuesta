@@ -137,6 +137,10 @@ Detrás, el endpoint `POST /debug/run` despacha la tarea a Celery y
 .venv/bin/python -m pytest -q
 ```
 
+Checks obligatorios de CI: `test` (pytest) y `secret-scan` (gitleaks +
+higiene de `.env`, ver `.github/workflows/secret-scan.yml`). Ambos deben
+estar en verde antes de mergear.
+
 ## Estructura
 
 ```
@@ -176,6 +180,9 @@ para revisión. Ver `docs/decisions/ADR-003-...` y
   más antiguo sin PR abierto, 1 por run.
 - **CI** (`test`) → corre `pytest` en cada PR y push a `main`; check obligatorio
   de branch protection. El agente debe dejar la suite verde antes de abrir el PR.
+- **Secret-scan** (`secret-scan`) → corre `gitleaks detect` sobre el diff/PR y
+  verifica que `.env` está ignorado y `.env.example` no contiene valores reales
+  (`python tools/check_secret_hygiene.py`); check obligatorio junto a `test`.
 - **Revisión y merge automático** (`opencode-review`) → un agente revisor
   comprueba la Definición de Hecho del proyecto (`docs/definition-of-done.md`),
   trae `main` sobre la rama resolviendo conflictos en verde y, si todo cumple,
