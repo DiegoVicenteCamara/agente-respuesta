@@ -206,6 +206,10 @@ const name = roomInput.value.trim() || "demo";
       const res = await fetch(
         "/token?room=" + encodeURIComponent(name) + "&identity=" + encodeURIComponent(identity)
       );
+          if (res.status === 429) {
+            const wait = res.headers.get("Retry-After") || "?";
+            throw new Error("Demasiadas peticiones, espera " + wait + " s");
+          }
           if (!res.ok) throw new Error("Error obteniendo token: " + (await res.text()));
           const { token, wsUrl } = await res.json();
           await room.connect(wsUrl, token);
@@ -498,6 +502,10 @@ const name = roomInput.value.trim() || "demo";
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ goal }),
           });
+          if (res.status === 429) {
+            const wait = res.headers.get("Retry-After") || "?";
+            throw new Error("Demasiadas peticiones, espera " + wait + " s");
+          }
           if (!res.ok) throw new Error((await res.json()).detail || "error");
           const { task_id } = await res.json();
           lastGoal = goal;

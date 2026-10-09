@@ -2,10 +2,11 @@
 
 import asyncio
 import json
+import time
 import uuid
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from livekit.api import AccessToken, VideoGrants
@@ -19,6 +20,34 @@ app = FastAPI(title="Respuesta — Agente de voz con subagentes", version="0.1.0
 
 WEB_DIR = Path(__file__).resolve().parents[2] / "web"
 
+_RATE_WINDOW_SECONDS = 60.0
+_rate_buckets: dict[str, list[float]] = {}
+
+
+def _reset_rate_limits() -> None:
+    """Vacía el estado del limitador (uso en tests)."""
+    _rate_buckets.clear()
+
+
+def _check_rate_limit(key: str, limit_per_min: int) -> int | None:
+    """Ventana fija en memoria por clave. Devuelve Retry-After si excede, None si pasa."""
+    if limit_per_min <= 0:
+        return None
+    now = time.time()
+    hits = _rate_buckets.setdefault(key, [])
+    cutoff = now - _RATE_WINDOW_SECONDS
+    del hits[: sum(1 for t in hits if t <= cutoff)]
+    if len(hits) >= limit_per_min:
+        retry_after = max(1, int(hits[0] + _RATE_WINDOW_SECONDS - now + 0.999))
+        return retry_after
+    hits.append(now)
+    return None
+
+
+def _client_key(request: Request, scope: str) -> str:
+    ip = request.client.host if request.client else "unknown"
+    return f"{scope}:{ip}"
+
 
 class RunGoal(BaseModel):
     goal: str
@@ -31,9 +60,19 @@ async def index() -> FileResponse:
 
 @app.get("/token")
 async def get_token(
+    request: Request,
     room: str = Query("demo", description="Nombre de la sala WebRTC"),
     identity: str | None = Query(None, description="Identidad opcional del usuario"),
 ) -> dict:
+    retry_after = _check_rate_limit(
+        _client_key(request, "token"), settings.rate_limit_token_per_min
+    )
+    if retry_after is not None:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Demasiadas peticiones, espera {retry_after} s",
+            headers={"Retry-After": str(retry_after)},
+        )
     if not settings.livekit_api_key or not settings.livekit_api_secret:
         raise HTTPException(
             status_code=500,
@@ -55,8 +94,17 @@ async def get_token(
 
 
 @app.post("/debug/run")
-async def debug_run(body: RunGoal) -> dict:
+async def debug_run(body: RunGoal, request: Request) -> dict:
     """Lanza una tarea de prueba a los subagentes (Celery) sin pasar por la voz."""
+    retry_after = _check_rate_limit(
+        _client_key(request, "debug-run"), settings.rate_limit_debug_per_min
+    )
+    if retry_after is not None:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Demasiadas peticiones, espera {retry_after} s",
+            headers={"Retry-After": str(retry_after)},
+        )
     goal = body.goal.strip()
     if not goal:
         raise HTTPException(status_code=400, detail="El objetivo no puede estar vacío")
