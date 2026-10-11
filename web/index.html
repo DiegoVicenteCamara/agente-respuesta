@@ -126,6 +126,7 @@
     <div class="controls">
       <input id="goal" value="Explica en dos frases qué es Redis" autocomplete="off" />
       <button id="runTask" style="background:#a78bfa;color:#2e1065;">Iniciar tarea</button>
+      <button id="cancelTask" style="background:#f87171;color:#450a0a;display:none;">Cancelar</button>
     </div>
     <div class="workspace">
       <div class="pane graph-pane">
@@ -234,9 +235,28 @@ const name = roomInput.value.trim() || "demo";
       // --- Modo prueba: subagentes sin voz -------------------------------
       const goalInput = document.getElementById("goal");
       const runBtn = document.getElementById("runTask");
+      const cancelBtn = document.getElementById("cancelTask");
       const agentsEl = document.getElementById("agents");
       const graphContainer = document.getElementById("gitgraph");
       const BADGE = { planner: "PLANIFICADOR", research: "SUBAGENTE", synthesize: "SUPERVISOR" };
+      let currentTaskId = null;
+      let currentES = null;
+
+      function setRunning(running, taskId) {
+        runBtn.disabled = running;
+        cancelBtn.style.display = running ? "" : "none";
+        cancelBtn.disabled = !running;
+        currentTaskId = running ? taskId || currentTaskId : null;
+      }
+
+      function finishRunning() {
+        if (currentES) {
+          try { currentES.close(); } catch (e) { /* noop */ }
+          currentES = null;
+        }
+        setRunning(false, null);
+        loadHistory();
+      }
 
       const NS = "http://www.w3.org/2000/svg";
       const MAIN_X = 26, LANE_OFF = 14, LANE_GAP = 30, SP = 34, TOP = 16;
@@ -458,7 +478,7 @@ const name = roomInput.value.trim() || "demo";
             br.mergeY = hist.mainY;
           }
         }
-        if (ev.type === "analysis_ready") {
+        if (ev.type === "analysis_ready" || ev.type === "task_cancelled") {
           if (t.finalY == null) {
             commitMain();
             t.finalY = hist.mainY;
@@ -487,6 +507,7 @@ const name = roomInput.value.trim() || "demo";
           runBtn.disabled = true;
           agentsEl.className = "trabajando";
           const es = new EventSource("/debug/stream");
+          currentES = es;
           await new Promise((resolve, reject) => {
             es.addEventListener("open", () => resolve(), { once: true });
             es.onerror = () => {
@@ -501,28 +522,54 @@ const name = roomInput.value.trim() || "demo";
           if (!res.ok) throw new Error((await res.json()).detail || "error");
           const { task_id } = await res.json();
           lastGoal = goal;
+          setRunning(true, task_id);
           es.onmessage = (e) => {
             const ev = JSON.parse(e.data);
             if (ev.task_id !== task_id) return;
             handleEvent(ev);
-            if (ev.type === "analysis_ready" || ev.priority === "urgent") {
-              es.close();
-              runBtn.disabled = false;
-              loadHistory();
+            if (ev.type === "analysis_ready" || ev.type === "task_cancelled" || ev.priority === "urgent") {
+              finishRunning();
             }
           };
           es.onerror = () => {
             if (es.readyState === EventSource.CLOSED) {
-              es.close();
-              runBtn.disabled = false;
-              loadHistory();
+              finishRunning();
               agentLine({ agent: "planner", message: "Se perdió la conexión con el bus de eventos.", priority: "silent" });
             }
           };
         } catch (err) {
           agentsEl.className = "";
           agentLine({ agent: "planner", message: "Error: " + err.message, priority: "silent" });
-          runBtn.disabled = false;
+          setRunning(false, null);
+          currentES = null;
+        }
+      });
+
+      cancelBtn.addEventListener("click", async () => {
+        if (!currentTaskId) return;
+        const taskId = currentTaskId;
+        try {
+          cancelBtn.disabled = true;
+          const res = await fetch("/debug/cancel/" + encodeURIComponent(taskId), { method: "POST" });
+          if (!res.ok) {
+            let detail = "error";
+            try { detail = (await res.json()).detail || detail; } catch (e) { /* noop */ }
+            throw new Error(detail);
+          }
+          agentLine({ agent: "orchestrator", message: "Tarea cancelada", priority: "info", task_id: taskId });
+          try {
+            const t = hist.taskBy[taskId];
+            if (t && !t.done) {
+              t.done = true;
+              freeLane(t.lane);
+              drawGraph();
+              updateAgentsClass();
+            }
+          } catch (e) { /* noop */ }
+          finishRunning();
+        } catch (err) {
+          agentLine({ agent: "planner", message: "Error al cancelar: " + err.message, priority: "silent" });
+          if (currentTaskId) cancelBtn.disabled = false;
         }
       });
 

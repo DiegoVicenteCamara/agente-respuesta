@@ -126,7 +126,10 @@ La web incluye un panel **"Modo prueba"**: escribe un objetivo, pulsa
 (`plan_ready` → `subtask_done` → `analysis_ready`) llegando por el mismo bus
 Redis y con la misma prioridad (`silent`/`info`/`urgent`) que usaría la voz.
 Detrás, el endpoint `POST /debug/run` despacha la tarea a Celery y
-`GET /debug/stream` (SSE) la reenvía al navegador.
+`GET /debug/stream` (SSE) la reenvía al navegador. Mientras hay tarea en
+curso aparece **Cancelar**, que llama a `POST /debug/cancel/{task_id}`
+(revoca en Celery y publica `task_cancelled` en el bus); cancelar una tarea
+inexistente o ya terminada devuelve `404`.
 
 > La búsqueda usa DuckDuckGo si no hay `TAVILY_API_KEY`; suele tardar o
 > devolver vacío aleatoriamente — los eventos se siguen emitiendo igualmente.
