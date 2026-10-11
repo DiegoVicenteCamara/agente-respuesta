@@ -2,6 +2,8 @@
 
 import asyncio
 import json
+import logging
+import time
 import uuid
 from pathlib import Path
 
@@ -18,6 +20,13 @@ from backend.config import settings
 app = FastAPI(title="Respuesta — Agente de voz con subagentes", version="0.1.0")
 
 WEB_DIR = Path(__file__).resolve().parents[2] / "web"
+
+logger = logging.getLogger(__name__)
+
+#: Tareas de prueba lanzadas desde el panel web pendientes de terminar.
+#: Se usa para resolver 404 en cancelaciones sin tarea en curso cuando
+#: Redis aún no tiene eventos de la tarea (o está caído).
+DEBUG_TASKS: set[str] = set()
 
 
 class RunGoal(BaseModel):
@@ -63,8 +72,83 @@ async def debug_run(body: RunGoal) -> dict:
     from backend.orchestrator.tasks import run_pipeline
 
     task_id = f"web-{uuid.uuid4().hex[:8]}"
-    await asyncio.to_thread(run_pipeline.delay, task_id=task_id, goal=goal)
+    # apply_async con task_id explícito para que revoke(task_id) funcione
+    # (delay no fija el id del mensaje Celery y la cancelación no llegaría).
+    await asyncio.to_thread(
+        run_pipeline.apply_async,
+        kwargs={"task_id": task_id, "goal": goal},
+        task_id=task_id,
+    )
+    DEBUG_TASKS.add(task_id)
     return {"task_id": task_id}
+
+
+@app.post("/debug/cancel/{task_id}")
+async def debug_cancel(task_id: str) -> dict:
+    """Revoca una tarea de prueba en curso y publica `task_cancelled` en el bus."""
+    from backend.orchestrator.tasks import celery_app
+
+    task_id = task_id.strip()
+    if not task_id:
+        raise HTTPException(status_code=404, detail="Tarea no encontrada")
+
+    goal: str | None = None
+    has_events = False
+    already_finished = False
+    try:
+        detail = await redis_client.get_task_events(task_id)
+        events = detail.get("events", [])
+        has_events = bool(events)
+        goal = detail.get("goal")
+        if not goal:
+            for ev in events:
+                if ev.get("goal"):
+                    goal = ev["goal"]
+                    break
+        already_finished = any(
+            ev.get("type") in ("analysis_ready", "blocked", "task_cancelled")
+            or ev.get("priority") == "urgent"
+            for ev in events
+        )
+    except Exception:  # noqa: BLE001
+        logger.warning("No se pudo leer eventos para cancelar task_id=%s", task_id)
+
+    known_in_memory = task_id in DEBUG_TASKS
+    if already_finished:
+        DEBUG_TASKS.discard(task_id)
+        raise HTTPException(
+            status_code=404, detail="Tarea no encontrada o sin tarea en curso"
+        )
+    if not known_in_memory and not has_events:
+        raise HTTPException(
+            status_code=404, detail="Tarea no encontrada o sin tarea en curso"
+        )
+
+    try:
+        await asyncio.to_thread(
+            celery_app.control.revoke, task_id, terminate=True, signal="SIGTERM"
+        )
+    except Exception:  # noqa: BLE001
+        logger.exception("No se pudo revocar la tarea task_id=%s", task_id)
+
+    message = f"Tarea cancelada: {goal}" if goal else "Tarea cancelada"
+    payload = {
+        "task_id": task_id,
+        "type": "task_cancelled",
+        "agent": "orchestrator",
+        "message": message,
+        "priority": "info",
+        "ts": int(time.time() * 1000),
+    }
+    if goal:
+        payload["goal"] = goal
+    try:
+        await redis_client.publish_event(payload)
+    except Exception:  # noqa: BLE001
+        logger.exception("No se pudo publicar task_cancelled task_id=%s", task_id)
+
+    DEBUG_TASKS.discard(task_id)
+    return {"task_id": task_id, "cancelled": True}
 
 
 @app.get("/tasks")

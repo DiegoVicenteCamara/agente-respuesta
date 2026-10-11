@@ -57,8 +57,9 @@ def test_debug_run_dispatches_to_celery(monkeypatch):
 
     class Fake:
         @staticmethod
-        def delay(**kwargs):
-            calls.update(kwargs)
+        def apply_async(**kwargs):
+            calls.update(kwargs.get("kwargs", {}))
+            calls["_task_id"] = kwargs.get("task_id")
 
     monkeypatch.setattr(tasks, "run_pipeline", Fake())
     client = TestClient(main.app)
@@ -68,6 +69,7 @@ def test_debug_run_dispatches_to_celery(monkeypatch):
     assert body["task_id"].startswith("web-")
     assert calls["goal"] == "probar redis"
     assert calls["task_id"] == body["task_id"]
+    assert calls["_task_id"] == body["task_id"]
 
 
 def test_debug_run_requires_goal():

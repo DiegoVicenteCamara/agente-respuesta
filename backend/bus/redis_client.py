@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 _async: AsyncRedis | None = None
 _sync: SyncRedis | None = None
 
-TERMINAL_TYPES = {"analysis_ready", "blocked"}
+TERMINAL_TYPES = {"analysis_ready", "blocked", "task_cancelled"}
 
 
 def get_async() -> AsyncRedis:
