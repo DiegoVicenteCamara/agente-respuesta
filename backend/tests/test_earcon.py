@@ -257,3 +257,67 @@ async def test_listen_disabled_no_earcon_but_replies(monkeypatch, disable_earcon
     assert played == [{"message": "listo", "priority": "info"}]
     # play_earcon real con flag off devuelve False: conducta intacta.
     assert session.replies == ["Disculpa que te interrumpa, listo"]
+
+
+# --- Helper should_play_earcon(payload, settings) pedido por la issue #56 ---
+
+
+def test_should_play_earcon_explicit_settings_enabled(monkeypatch):
+    monkeypatch.setenv("EARCON_ENABLED", "true")
+    monkeypatch.setenv("EARCON_PATH", "")
+    cfg = Settings()
+    assert earcon.should_play_earcon({"message": "x", "priority": "info"}, cfg) is True
+    assert earcon.should_play_earcon({"message": "x", "priority": "urgent"}, cfg) is True
+    assert (
+        earcon.should_play_earcon({"message": "x", "priority": "silent"}, cfg) is False
+    )
+
+
+def test_should_play_earcon_explicit_settings_disabled(monkeypatch):
+    monkeypatch.setenv("EARCON_ENABLED", "false")
+    cfg = Settings()
+    assert (
+        earcon.should_play_earcon({"message": "x", "priority": "info"}, cfg) is False
+    )
+
+
+def test_should_play_earcon_tolerates_bad_payload(monkeypatch):
+    monkeypatch.setenv("EARCON_ENABLED", "true")
+    cfg = Settings()
+    assert earcon.should_play_earcon(None, cfg) is False  # type: ignore[arg-type]
+    assert earcon.should_play_earcon("no-dict", cfg) is False  # type: ignore[arg-type]
+
+
+def test_should_play_alias_matches_helper(enable_earcon):
+    payload = {"message": "x", "priority": "info"}
+    assert earcon.should_play(payload) is True
+    assert earcon.should_play_earcon(payload) is True
+
+
+@pytest.mark.asyncio
+async def test_invalid_path_falls_back_to_synth_without_failing(
+    monkeypatch, enable_earcon
+):
+    """Path inválido: no falla, habla igual (tono sintetizado de respaldo)."""
+    monkeypatch.setattr(settings, "earcon_path", "/no/existe/tono.wav")
+    session = FakeSession()
+    played = await earcon.play_earcon(session, {"message": "x", "priority": "info"})
+    assert played is True
+    assert len(session.say_calls) == 1
+    frames = [f async for f in session.say_calls[0]["audio"]]
+    assert frames
+
+
+@pytest.mark.asyncio
+async def test_mp3_or_corrupt_file_falls_back_gracefully(
+    monkeypatch, enable_earcon, tmp_path
+):
+    """Un .mp3 (no decodificable como wav) cae al sintetizado, nunca excepción."""
+    fake_mp3 = tmp_path / "tono.mp3"
+    fake_mp3.write_bytes(b"ID3\x00\x01\x02no-es-wav")
+    monkeypatch.setattr(settings, "earcon_path", str(fake_mp3))
+    session = FakeSession()
+    played = await earcon.play_earcon(session, {"message": "x", "priority": "info"})
+    assert played is True
+    frames = [f async for f in session.say_calls[0]["audio"]]
+    assert frames

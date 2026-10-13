@@ -33,15 +33,26 @@ TONE_DURATION_MS = 300
 FRAME_SAMPLES = 240  # 10 ms a 24 kHz
 
 
-def should_play(payload: dict) -> bool:
-    """Dice si este evento debe sonar (flag activo + prioridad audible)."""
-    if not settings.earcon_enabled:
+def should_play_earcon(payload: dict, cfg=None) -> bool:
+    """Dice si este evento debe sonar (flag activo + prioridad audible).
+
+    ``cfg`` es un ``Settings`` explícito (para tests); por defecto usa el
+    ``settings`` global. Existe como nombre pedido por la issue #56; la
+    política no cambia ``notifier``: solo ``info``/``urgent`` suenan.
+    """
+    active = getattr(cfg if cfg is not None else settings, "earcon_enabled", False)
+    if not active:
         return False
     try:
         priority = notifier.classify(payload)
     except (AttributeError, TypeError):
         return False
     return priority in EARCON_PRIORITIES
+
+
+def should_play(payload: dict) -> bool:
+    """Compat: equivale a ``should_play_earcon(payload)`` con settings global."""
+    return should_play_earcon(payload, settings)
 
 
 async def synthesize_tone(
@@ -100,7 +111,12 @@ async def load_audio_frames(path: str | Path) -> AsyncIterator[rtc.AudioFrame]:
 
 
 def _audio_source() -> AsyncIterator[rtc.AudioFrame]:
-    """Elige el asset configurado o el tono sintetizado de respaldo."""
+    """Elige el asset configurado o el tono sintetizado de respaldo.
+
+    Solo se decodifica ``.wav`` PCM nativo; un ``.mp3`` u otro formato
+    ilegible cae al tono sintetizado con ``warning`` (nunca excepción),
+    para no aumentar la latencia ni romper el plano de voz.
+    """
     configured = (settings.earcon_path or "").strip()
 
     async def _gen() -> AsyncIterator[rtc.AudioFrame]:

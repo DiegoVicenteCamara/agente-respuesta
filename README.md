@@ -162,6 +162,12 @@ web/index.html             # Cliente del navegador (livekit-client)
 - **`priority: info`** → habla con prefacio cortés *«Disculpa que te
   interrumpa…»* respetando el barge-in (`allow_interruptions=True`).
 - **`priority: urgent`** → *«Necesito tu atención…»*.
+- **Earcon (tono previo)**: con `EARCON_ENABLED=true` suena un tono breve
+  (~300 ms) antes de cada `info`/`urgent`; `EARCON_PATH` opcional a un
+  `.wav` local (vacío usa el tono sintetizado; ilegible/`mp3` cae al
+  sintetizado con `warning`, nunca falla). Con `false`, en `silent` o si
+  falla, habla igual que antes sin tono. Se silencia con `EARCON_ENABLED=false`,
+  colgando o con el botón **Silenciar** del panel (barge-in).
 
 ## Implementación autónoma de issues (opencode en CI)
 
@@ -210,5 +216,4 @@ secret `OPENCODE_API_KEY` (suscripción opencode Zen/Go) y los labels
 ## Siguiente paso natural
 
 Entrada por **teléfono real (SIP/PSTN)** con llamadas salientes
-(`CreateSIPParticipant`) cuando el usuario cuelga y los subagentes terminan, y
-un **earcon** (tono previo) antes de hablar, como propone la investigación.
+(`CreateSIPParticipant`) cuando el usuario cuelga y los subagentes terminan.
