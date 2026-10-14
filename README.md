@@ -56,6 +56,10 @@ cp .env.example .env
 # rellena LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, OPENAI_API_KEY
 ```
 
+Referencia completa de las 34 claves y del modelo de precios (`cost_ready`):
+[`docs/env.md`](docs/env.md). `.env.example` contiene todas las claves
+(solo placeholders, sin secretos).
+
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r backend/requirements.txt
