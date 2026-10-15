@@ -97,6 +97,16 @@
       margin-top:12px; flex-shrink:0; max-height:30vh; overflow:auto;
       border-top:1px solid #334155; padding-top:10px;
     }
+    #banner {
+      margin-top:12px; background:#451a03; border:1px solid #fbbf24; border-radius:8px;
+      padding:10px 12px; font-size:.85rem; color:#fde68a;
+      display:flex; gap:10px; align-items:center;
+    }
+    #banner[hidden] { display:none; }
+    #bannerText { flex:1; }
+    #bannerRetry {
+      background:#fbbf24; color:#451a03; flex-shrink:0;
+    }
     .history-item { margin:6px 0; display:flex; gap:8px; align-items:baseline; cursor:pointer; }
     .history-item:hover .msg { color:#22d3ee; }
     .history-item .msg { flex:1; }
@@ -113,19 +123,23 @@
 
     <div class="controls">
       <input id="room" value="demo" placeholder="Sala (ej. demo)" autocomplete="off" />
-      <button id="connect">Llamar</button>
-      <button id="hangup" disabled>Colgar</button>
-      <button id="mute" disabled>Silenciar</button>
+      <button id="connect" aria-label="Llamar a la sala de voz">Llamar</button>
+      <button id="hangup" disabled aria-label="Colgar la llamada de voz">Colgar</button>
+      <button id="mute" disabled aria-label="Silenciar o activar el micrófono">Silenciar</button>
     </div>
 
-    <p id="status"><span class="dot" id="dot"></span><span id="statusText">Desconectado</span></p>
-    <ul id="log"></ul>
+    <p id="status" aria-live="polite"><span class="dot" id="dot" aria-hidden="true"></span><span id="statusText">Desconectado</span></p>
+    <ul id="log" role="log" aria-live="polite" aria-label="Registro de eventos de la llamada"></ul>
 
     <hr style="border:0;border-top:1px solid #334155;margin:20px 0 14px;" />
     <h2 style="font-size:.95rem;margin:0 0 8px;"><span style="color:var(--accent)">Modo prueba</span> · subagentes sin voz</h2>
     <div class="controls">
       <input id="goal" value="Explica en dos frases qué es Redis" autocomplete="off" />
-      <button id="runTask" style="background:#a78bfa;color:#2e1065;">Iniciar tarea</button>
+      <button id="runTask" style="background:#a78bfa;color:#2e1065;" aria-label="Iniciar tarea de prueba con subagentes">Iniciar tarea</button>
+    </div>
+    <div id="banner" role="alert" aria-live="assertive" tabindex="-1" hidden>
+      <span id="bannerText"></span>
+      <button id="bannerRetry" type="button">Reintentar</button>
     </div>
     <div class="workspace">
       <div class="pane graph-pane">
@@ -135,7 +149,7 @@
       <div id="resizer" title="Arrastra para redimensionar"></div>
       <div class="pane resp-pane">
         <p class="pane-title">Respuestas de los agentes</p>
-        <div id="agents">
+        <div id="agents" role="log" aria-live="polite" aria-label="Avisos de los subagentes">
           <p class="sub" style="margin:10px 0 0;">Aquí verás los avisos proactivos del orquestador (plan_ready → subtask_done → analysis_ready).</p>
         </div>
       </div>
@@ -236,7 +250,29 @@ const name = roomInput.value.trim() || "demo";
       const runBtn = document.getElementById("runTask");
       const agentsEl = document.getElementById("agents");
       const graphContainer = document.getElementById("gitgraph");
+      const bannerEl = document.getElementById("banner");
+      const bannerText = document.getElementById("bannerText");
+      const bannerRetry = document.getElementById("bannerRetry");
       const BADGE = { planner: "PLANIFICADOR", research: "SUBAGENTE", synthesize: "SUPERVISOR" };
+
+      function showBanner(msg) {
+        bannerText.textContent = msg;
+        bannerEl.hidden = false;
+        try { bannerEl.focus({ preventScroll: false }); } catch (e) { bannerEl.focus(); }
+      }
+
+      function hideBanner() {
+        bannerText.textContent = "";
+        bannerEl.hidden = true;
+      }
+
+      if (bannerRetry) {
+        bannerRetry.addEventListener("click", () => {
+          hideBanner();
+          loadHistory();
+          try { runBtn.focus(); } catch (e) { /* sin foco disponible */ }
+        });
+      }
 
       const NS = "http://www.w3.org/2000/svg";
       const MAIN_X = 26, LANE_OFF = 14, LANE_GAP = 30, SP = 34, TOP = 16;
@@ -485,6 +521,7 @@ const name = roomInput.value.trim() || "demo";
         if (!goal) return;
         try {
           runBtn.disabled = true;
+          hideBanner();
           agentsEl.className = "trabajando";
           const es = new EventSource("/debug/stream");
           await new Promise((resolve, reject) => {
@@ -517,12 +554,14 @@ const name = roomInput.value.trim() || "demo";
               runBtn.disabled = false;
               loadHistory();
               agentLine({ agent: "planner", message: "Se perdió la conexión con el bus de eventos.", priority: "silent" });
+              showBanner("Bus no disponible, reintentando. Pulsa Reintentar para recargar el historial.");
             }
           };
         } catch (err) {
           agentsEl.className = "";
           agentLine({ agent: "planner", message: "Error: " + err.message, priority: "silent" });
           runBtn.disabled = false;
+          showBanner("Bus no disponible, reintentando. Pulsa Reintentar para recargar el historial.");
         }
       });
 
@@ -542,7 +581,10 @@ const name = roomInput.value.trim() || "demo";
         }
         try {
           const res = await fetch("/tasks/" + encodeURIComponent(t.task_id));
-          if (!res.ok) return;
+          if (!res.ok) {
+            showBanner("Redis no disponible. Pulsa Reintentar para recargar el historial.");
+            return;
+          }
           const body = await res.json();
           const box = document.createElement("div");
           box.className = "history-events";
@@ -560,14 +602,20 @@ const name = roomInput.value.trim() || "demo";
           }
           row.classList.add("open");
           row.append(box);
-        } catch (err) { /* Redis caído: historial no disponible de momento */ }
+        } catch (err) {
+          showBanner("Redis no disponible. Pulsa Reintentar para recargar el historial.");
+        }
       }
 
       async function loadHistory() {
         try {
           const res = await fetch("/tasks");
-          if (!res.ok) return;
+          if (!res.ok) {
+            showBanner("Redis no disponible. Pulsa Reintentar para recargar el historial.");
+            return;
+          }
           const tasks = await res.json();
+          hideBanner();
           taskList.innerHTML = "";
           if (!tasks.length) {
             const p = document.createElement("p");
@@ -590,7 +638,9 @@ const name = roomInput.value.trim() || "demo";
             row.addEventListener("click", () => expandTask(t, row));
             taskList.append(row);
           }
-        } catch (err) { /* Redis caído: no se rellena el historial */ }
+        } catch (err) {
+          showBanner("Redis no disponible. Pulsa Reintentar para recargar el historial.");
+        }
       }
 
       loadHistory();
